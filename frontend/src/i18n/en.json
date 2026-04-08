@@ -1,0 +1,81 @@
+{
+  "common": {
+    "title": "Developer Resource Hub",
+    "subtitle": "Your personal library of developer resources",
+    "search": "Search resources...",
+    "search_button": "Search",
+    "add": "Add Resource",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "delete_confirm": "Are you sure you want to delete this resource?",
+    "language": "Language",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  },
+  "sidebar": {
+    "title": "Filters",
+    "all_categories": "All Categories",
+    "category": "Category",
+    "subcategory": "Subcategory",
+    "tags": "Tags",
+    "favorites_only": "Favorites Only"
+  },
+  "form": {
+    "title": "Resource Title",
+    "url": "URL",
+    "category": "Category",
+    "subcategory": "Subcategory (Optional)",
+    "description": "Description",
+    "notes": "Notes",
+    "technologies": "Technologies",
+    "tags": "Tags",
+    "add_resource": "Add New Resource",
+    "edit_resource": "Edit Resource",
+    "title_required": "Title is required",
+    "url_required": "URL is required",
+    "category_required": "Category is required",
+    "url_invalid": "Invalid URL",
+    "created_successfully": "Resource created successfully",
+    "updated_successfully": "Resource updated successfully",
+    "failed_to_create": "Failed to create resource",
+    "failed_to_update": "Failed to update resource"
+  },
+  "card": {
+    "by": "by",
+    "open": "Open",
+    "remove": "Remove",
+    "edit": "Edit",
+    "created": "Created",
+    "updated": "Updated"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "messages": {
+    "no_resources": "No resources found",
+    "no_results": "No results match your search",
+    "failed_to_fetch": "Failed to fetch resources",
+    "failed_to_delete": "Failed to delete resource",
+    "failed_to_update": "Failed to update favorite status"
+  },
+  "categories": {
+    "Backend": "Backend",
+    "Frontend": "Frontend",
+    "Algorithm": "Algorithm",
+    "UI Design": "UI / Design",
+    "Dev Tools": "Dev Tools",
+    "AI Tools": "AI Tools",
+    "Learning": "Learning",
+    "DevOps": "DevOps",
+    "Testing": "Testing",
+    "Productivity": "Productivity"
+  }
+}

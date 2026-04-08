@@ -1,0 +1,81 @@
+{
+  "common": {
+    "title": "Kho Tài Nguyên Lập Trình",
+    "subtitle": "Thư viện cá nhân của bạn chứa các tài nguyên lập trình",
+    "search": "Tìm kiếm tài nguyên...",
+    "search_button": "Tìm kiếm",
+    "add": "Thêm Tài Nguyên",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "delete_confirm": "Bạn có chắc muốn xóa tài nguyên này?",
+    "language": "Ngôn ngữ",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  },
+  "sidebar": {
+    "title": "Bộ lọc",
+    "all_categories": "Tất cả Danh mục",
+    "category": "Danh mục",
+    "subcategory": "Danh mục con",
+    "tags": "Thẻ",
+    "favorites_only": "Chỉ Yêu thích"
+  },
+  "form": {
+    "title": "Tiêu đề Tài Nguyên",
+    "url": "Đường dẫn",
+    "category": "Danh mục",
+    "subcategory": "Danh mục con (Tùy chọn)",
+    "description": "Mô tả",
+    "notes": "Ghi chú",
+    "technologies": "Công nghệ",
+    "tags": "Thẻ",
+    "add_resource": "Thêm Tài Nguyên Mới",
+    "edit_resource": "Sửa Tài Nguyên",
+    "title_required": "Tiêu đề là bắt buộc",
+    "url_required": "Đường dẫn là bắt buộc",
+    "category_required": "Danh mục là bắt buộc",
+    "url_invalid": "Đường dẫn không hợp lệ",
+    "created_successfully": "Tài nguyên được tạo thành công",
+    "updated_successfully": "Tài nguyên được cập nhật thành công",
+    "failed_to_create": "Không thể tạo tài nguyên",
+    "failed_to_update": "Không thể cập nhật tài nguyên"
+  },
+  "card": {
+    "by": "bởi",
+    "open": "Mở",
+    "remove": "Xóa",
+    "edit": "Sửa",
+    "created": "Tạo",
+    "updated": "Cập nhật"
+  },
+  "pagination": {
+    "page": "Trang",
+    "of": "trong",
+    "previous": "Trước",
+    "next": "Tiếp"
+  },
+  "messages": {
+    "no_resources": "Không có tài nguyên nào",
+    "no_results": "Không có kết quả phù hợp với tìm kiếm của bạn",
+    "failed_to_fetch": "Không thể tải tài nguyên",
+    "failed_to_delete": "Không thể xóa tài nguyên",
+    "failed_to_update": "Không thể cập nhật trạng thái yêu thích"
+  },
+  "categories": {
+    "Backend": "Backend",
+    "Frontend": "Frontend",
+    "Algorithm": "Thuật toán",
+    "UI Design": "Thiết kế UI",
+    "Dev Tools": "Công cụ Lập trình",
+    "AI Tools": "Công cụ AI",
+    "Learning": "Học tập",
+    "DevOps": "DevOps",
+    "Testing": "Kiểm thử",
+    "Productivity": "Năng suất"
+  }
+}
