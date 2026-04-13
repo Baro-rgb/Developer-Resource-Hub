@@ -10,21 +10,7 @@ const Joi = require('joi');
 const resourceSchema = Joi.object({
   title: Joi.string().min(3).max(255).required(),
   category: Joi.string()
-    .valid(
-      'Backend',
-      'Frontend',
-      'Algorithm',
-      'UI / Design',
-      'Dev Tools',
-      'AI Tools',
-      'Learning',
-      'DevOps',
-      'Testing',
-      'Productivity',
-      'History AI',
-      'TIKTOK CHANNELS',
-      'TikTok Photos'
-    )
+    .max(100)
     .optional()
     .allow(null, ''),
   subcategory: Joi.string().max(100).optional().allow(null, ''),
@@ -32,8 +18,8 @@ const resourceSchema = Joi.object({
     .uri()
     .required(),
   technologies: Joi.array().items(Joi.string()).optional(),
-  description: Joi.string().max(1000).optional(),
-  notes: Joi.string().max(1000).optional(),
+  description: Joi.string().max(1000).optional().allow(null, ''),
+  notes: Joi.string().max(1000).optional().allow(null, ''),
   source: Joi.string()
     .valid('Tiktok', 'YouTube', 'Facebook', 'Twitter', 'Blog', 'GitHub', 'Khác')
     .optional()
@@ -71,6 +57,36 @@ const categoryUpdateSchema = Joi.object({
   subcategories: Joi.array().items(Joi.string()).optional(),
 });
 
+const bulkResourceItemSchema = Joi.object({
+  title: Joi.string().min(1).max(255).required(),
+  category: Joi.string().max(100).optional().allow(null, ''),
+  subcategory: Joi.string().max(100).optional().allow(null, ''),
+  url: Joi.string().uri().required(),
+  technologies: Joi.array().items(Joi.string()).optional(),
+  description: Joi.string().max(1000).optional().allow(null, ''),
+  notes: Joi.string().max(1000).optional().allow(null, ''),
+  source: Joi.string()
+    .valid('Tiktok', 'YouTube', 'Facebook', 'Twitter', 'Blog', 'GitHub', 'Khác')
+    .optional()
+    .allow(null, ''),
+  lastUsedDate: Joi.date().optional().allow(null, ''),
+});
+
+const bulkCreateSchema = Joi.object({
+  resources: Joi.array().items(bulkResourceItemSchema).min(1).max(200).required(),
+});
+
+const bulkDeleteSchema = Joi.object({
+  ids: Joi.array().items(Joi.number().integer().positive()).min(1).required(),
+});
+
+const bulkUpdateSchema = Joi.object({
+  ids: Joi.array().items(Joi.number().integer().positive()).min(1).required(),
+  field: Joi.string().valid('category', 'subcategory', 'source').required(),
+  value: Joi.any().allow('', null).required(),
+  mode: Joi.string().valid('replace', 'fill').optional(),
+});
+
 /**
  * Validate request body
  * @param {Object} schema - Joi schema để validate
@@ -101,4 +117,7 @@ module.exports = {
   userUpdateSchema,
   categorySchema,
   categoryUpdateSchema,
+  bulkCreateSchema,
+  bulkDeleteSchema,
+  bulkUpdateSchema,
 };

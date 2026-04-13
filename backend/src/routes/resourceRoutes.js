@@ -5,11 +5,20 @@ const {
   getAllResources,
   getResourceById,
   createResource,
+  bulkCreateResources,
+  bulkUpdateResources,
+  bulkDeleteResources,
   updateResource,
   deleteResource,
   getSources,
 } = require('../controllers/resourceController');
-const { validateRequest, resourceSchema } = require('../middleware/validation');
+const {
+  validateRequest,
+  resourceSchema,
+  bulkCreateSchema,
+  bulkUpdateSchema,
+  bulkDeleteSchema,
+} = require('../middleware/validation');
 const authenticate = require('../middleware/authMiddleware');
 
 /**
@@ -29,6 +38,9 @@ router.get('/', getAllResources);
 // GET /api/resources/:id - Lấy chi tiết resource
 router.get('/:id', getResourceById);
 
+router.post('/bulk', validateRequest(bulkCreateSchema), bulkCreateResources);
+router.patch('/bulk', validateRequest(bulkUpdateSchema), bulkUpdateResources);
+router.delete('/bulk', validateRequest(bulkDeleteSchema), bulkDeleteResources);
 router.post('/', validateRequest(resourceSchema), createResource);
 router.put('/:id', validateRequest(resourceSchema), updateResource);
 router.delete('/:id', deleteResource);

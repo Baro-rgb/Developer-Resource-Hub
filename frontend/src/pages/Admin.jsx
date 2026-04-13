@@ -3,6 +3,27 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
+  ShieldCheck,
+  LayoutDashboard,
+  Package,
+  BarChart3,
+  Settings2,
+  HelpCircle,
+  LogOut,
+  Search,
+  Bell,
+  TrendingUp,
+  Users,
+  FolderTree,
+  Filter,
+  Download,
+  Edit2,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import {
   getAdminUsers,
   updateAdminUser,
   deleteAdminUser,
@@ -13,6 +34,99 @@ import {
   updateCategory,
   deleteCategory,
 } from '../services/api';
+
+const Sidebar = ({ onLogout }) => (
+  <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-slate-700/40 bg-slate-950/95 px-4 py-6">
+    <div className="mb-8 px-2">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/20">
+          <ShieldCheck className="h-6 w-6 text-blue-300" />
+        </div>
+        <div>
+          <div className="text-lg font-bold text-blue-300">Enterprise Core</div>
+          <div className="text-[10px] uppercase tracking-widest text-slate-500">System Authority</div>
+        </div>
+      </div>
+    </div>
+
+    <nav className="space-y-1">
+      {[
+        { icon: LayoutDashboard, label: 'Dashboard' },
+        { icon: Package, label: 'Resources' },
+        { icon: BarChart3, label: 'Analytics' },
+        { icon: ShieldCheck, label: 'Admin', active: true },
+        { icon: Settings2, label: 'Management' },
+      ].map((item) => (
+        <div
+          key={item.label}
+          className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold ${
+            item.active
+              ? 'bg-blue-500/10 text-blue-300'
+              : 'text-slate-400 transition-colors hover:bg-slate-800 hover:text-white'
+          }`}
+        >
+          <item.icon className="h-5 w-5" />
+          <span>{item.label}</span>
+        </div>
+      ))}
+    </nav>
+
+    <div className="mt-auto space-y-2 border-t border-slate-700/40 pt-4">
+      <div className="flex items-center gap-3 rounded-lg px-4 py-2 text-slate-400">
+        <HelpCircle className="h-5 w-5" />
+        <span className="text-sm">Help</span>
+      </div>
+      <button
+        onClick={onLogout}
+        className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+      >
+        <LogOut className="h-5 w-5" />
+        <span className="text-sm">Sign Out</span>
+      </button>
+    </div>
+  </aside>
+);
+
+const Topbar = ({ user, onLogout }) => (
+  <header className="fixed left-64 right-0 top-0 z-30 flex h-16 items-center justify-between border-b border-slate-700/40 bg-slate-950/80 px-8 backdrop-blur">
+    <div className="flex items-center gap-6">
+      <span className="text-xl font-bold text-blue-300">CommandCenter</span>
+      <div className="relative hidden md:block">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <input
+          className="w-72 rounded-lg border border-slate-700 bg-slate-900 py-2 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
+          placeholder="Global system search..."
+          type="text"
+        />
+      </div>
+    </div>
+
+    <div className="flex items-center gap-3">
+      <button className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white">
+        <Bell className="h-5 w-5" />
+      </button>
+      <div className="hidden text-sm text-slate-300 lg:block">{user?.email}</div>
+      <button onClick={onLogout} className="btn btn-secondary btn-sm">
+        Đăng xuất
+      </button>
+    </div>
+  </header>
+);
+
+const StatsCard = ({ label, value, hint, icon: Icon, borderClass }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    className={`rounded-xl border-l-4 bg-slate-900/80 p-5 ${borderClass}`}
+  >
+    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</div>
+    <div className="text-3xl font-extrabold text-white">{value}</div>
+    <div className="mt-2 flex items-center gap-2 text-xs text-slate-300">
+      <Icon className="h-4 w-4" />
+      <span>{hint}</span>
+    </div>
+  </motion.div>
+);
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -186,318 +300,356 @@ const Admin = () => {
     );
   }
 
+  const doLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-white">Admin Dashboard</h1>
-            <p className="text-slate-400">Quản lý người dùng, tài nguyên và danh mục.</p>
-          </div>
-          <div className="flex flex-col items-start sm:items-end gap-3">
-            <div className="text-slate-300">
-              Đăng nhập với admin: <strong>{user?.email}</strong>
+    <div className="min-h-screen bg-slate-950">
+      <Sidebar onLogout={doLogout} />
+      <Topbar user={user} onLogout={doLogout} />
+
+      <main className="ml-64 mt-16 p-8">
+        <div className="mx-auto max-w-7xl space-y-8">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h1 className="text-5xl font-extrabold tracking-tight text-white">Authority Panel</h1>
+              <p className="mt-2 max-w-xl text-slate-400">
+                Global administrative controls and user resource orchestration.
+              </p>
             </div>
-            <button
-              onClick={() => {
-                logout();
-                navigate('/');
-              }}
-              className="btn btn-ghost btn-sm text-white border border-slate-600"
-            >
-              Đăng xuất
-            </button>
+            <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-3">
+              <StatsCard
+                label="Users"
+                value={userPagination.total || users.length}
+                hint="Managed identities"
+                icon={Users}
+                borderClass="border-blue-400"
+              />
+              <StatsCard
+                label="Resources"
+                value={resourcePagination.total || resources.length}
+                hint={selectedUserId ? 'Scoped by selected user' : 'Select user to inspect'}
+                icon={TrendingUp}
+                borderClass="border-emerald-400"
+              />
+              <StatsCard
+                label="Categories"
+                value={categoryPagination.total || categories.length}
+                hint="Taxonomy integrity"
+                icon={FolderTree}
+                borderClass="border-amber-300"
+              />
+            </div>
           </div>
-        </div>
 
         {(message || error) && (
-          <div className={`rounded-lg p-4 ${error ? 'bg-red-900 text-red-100' : 'bg-emerald-900 text-emerald-100'}`}>
+          <div className={`rounded-lg p-4 ${error ? 'bg-red-900/70 text-red-100' : 'bg-emerald-900/70 text-emerald-100'}`}>
             {error || message}
           </div>
         )}
 
-        <section className="bg-slate-800 rounded-3xl p-6">
-          <h2 className="text-2xl font-semibold text-white mb-4">Quản lý người dùng</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-3">ID</th>
-                  <th className="px-4 py-3">Tên</th>
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Admin</th>
-                  <th className="px-4 py-3">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((userItem) => (
-                  <tr key={userItem.id} className="border-t border-slate-700">
-                    <td className="px-4 py-3">{userItem.id}</td>
-                    <td className="px-4 py-3">{userItem.name}</td>
-                    <td className="px-4 py-3">{userItem.email}</td>
-                    <td className="px-4 py-3">{userItem.is_admin ? 'Yes' : 'No'}</td>
-                    <td className="px-4 py-3 flex flex-wrap gap-2">
-                      <button
-                        onClick={() => handleToggleAdmin(userItem.id, userItem.is_admin)}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        {userItem.is_admin ? 'Revoke Admin' : 'Grant Admin'}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedUserId(userItem.id);
-                          setSelectedUserName(userItem.name || userItem.email);
-                          setResourcePage(1);
-                          setCategoryPage(1);
-                        }}
-                        className="btn btn-info btn-sm"
-                      >
-                        Show
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(userItem.id)}
-                        className="btn btn-danger btn-sm"
-                        disabled={userItem.id === user.id}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 flex items-center justify-between text-slate-300">
-            <span>
-              Trang {userPagination.page} / {userPagination.totalPages} - Tổng {userPagination.total} người dùng
-            </span>
-            <div className="flex gap-2">
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setUserPage((prev) => Math.max(prev - 1, 1))}
-                disabled={userPagination.page <= 1}
-              >
-                Trước
-              </button>
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setUserPage((prev) => Math.min(prev + 1, userPagination.totalPages))}
-                disabled={userPagination.page >= userPagination.totalPages}
-              >
-                Sau
-              </button>
-            </div>
-          </div>
-        </section>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <section className="space-y-6 lg:col-span-2">
+              <div className="overflow-hidden rounded-xl border border-slate-700/30 bg-slate-900">
+                <div className="flex items-center justify-between border-b border-slate-700/40 bg-slate-900/80 px-6 py-4">
+                  <h2 className="text-xl font-bold text-white">User Management</h2>
+                  <div className="flex gap-2">
+                    <button className="btn btn-secondary btn-sm flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      Filters
+                    </button>
+                    <button className="btn btn-secondary btn-sm flex items-center gap-2">
+                      <Download className="h-4 w-4" />
+                      Export
+                    </button>
+                  </div>
+                </div>
 
-        <section className="bg-slate-800 rounded-3xl p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-              <h2 className="text-2xl font-semibold text-white">Quản lý tài nguyên</h2>
-              <p className="text-slate-400 text-sm">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-left text-sm text-slate-200">
+                    <thead>
+                      <tr className="border-b border-slate-700/40 bg-slate-900/40">
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest text-slate-400">ID</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest text-slate-400">Tên</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest text-slate-400">Email</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest text-slate-400">Admin</th>
+                        <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-slate-400">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((userItem) => (
+                        <tr key={userItem.id} className="border-t border-slate-800 hover:bg-slate-800/50">
+                          <td className="px-4 py-3">{userItem.id}</td>
+                          <td className="px-4 py-3">{userItem.name}</td>
+                          <td className="px-4 py-3">{userItem.email}</td>
+                          <td className="px-4 py-3">{userItem.is_admin ? 'Yes' : 'No'}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => handleToggleAdmin(userItem.id, userItem.is_admin)}
+                                className="btn btn-secondary btn-sm"
+                              >
+                                {userItem.is_admin ? 'Revoke Admin' : 'Grant Admin'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedUserId(userItem.id);
+                                  setSelectedUserName(userItem.name || userItem.email);
+                                  setResourcePage(1);
+                                  setCategoryPage(1);
+                                }}
+                                className="btn btn-secondary btn-sm"
+                              >
+                                Show
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(userItem.id)}
+                                className="btn btn-danger btn-sm"
+                                disabled={userItem.id === user.id}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-slate-700/40 bg-slate-900/70 px-6 py-3 text-sm text-slate-300">
+                  <span>
+                    Trang {userPagination.page} / {userPagination.totalPages} - Tổng {userPagination.total} người dùng
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setUserPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={userPagination.page <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setUserPage((prev) => Math.min(prev + 1, userPagination.totalPages))}
+                      disabled={userPagination.page >= userPagination.totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-6">
+              <div className="rounded-xl border border-slate-700/30 bg-slate-900 p-6">
+                <h3 className="mb-5 flex items-center gap-2 text-lg font-bold text-white">
+                  <Settings2 className="h-5 w-5 text-blue-300" />
+                  Quick Category Creation
+                </h3>
+                {!selectedUserId && (
+                  <div className="mb-4 rounded-lg border border-yellow-600/40 bg-yellow-900/20 p-3 text-sm text-yellow-200">
+                    Chọn một tài khoản để tạo danh mục cho tài khoản đó.
+                  </div>
+                )}
+                <form onSubmit={handleCategorySubmit} className="space-y-4">
+                  <div>
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Tên danh mục</label>
+                    <input
+                      value={categoryForm.name}
+                      onChange={(e) => setCategoryForm((prev) => ({ ...prev, name: e.target.value }))}
+                      className="input"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Key</label>
+                    <input
+                      value={categoryForm.key}
+                      onChange={(e) => setCategoryForm((prev) => ({ ...prev, key: e.target.value }))}
+                      className="input"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Subcategories</label>
+                    <input
+                      value={categoryForm.subcategories}
+                      onChange={(e) => setCategoryForm((prev) => ({ ...prev, subcategories: e.target.value }))}
+                      className="input"
+                      placeholder="API, Database, Authentication"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button type="submit" className="btn btn-primary flex-1">
+                      {editingCategory ? 'Cập nhật' : 'Thêm mới'}
+                    </button>
+                    {editingCategory && (
+                      <button type="button" onClick={handleCancelEdit} className="btn btn-secondary flex-1">
+                        Hủy bỏ
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            </section>
+          </div>
+
+          <section className="overflow-hidden rounded-xl border border-slate-700/30 bg-slate-900">
+            <div className="border-b border-slate-700/40 bg-slate-900/70 px-6 py-4">
+              <h2 className="text-xl font-bold text-white">Resource Management</h2>
+              <p className="mt-1 text-sm text-slate-400">
                 {selectedUserId
                   ? `Hiển thị tài nguyên cho: ${selectedUserName}`
                   : 'Chọn một tài khoản để xem tài nguyên riêng của họ.'}
               </p>
             </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-3">ID</th>
-                  <th className="px-4 py-3">Title</th>
-                  <th className="px-4 py-3">Owner</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {resources.map((resource) => (
-                  <tr key={resource.id} className="border-t border-slate-700">
-                    <td className="px-4 py-3">{resource.id}</td>
-                    <td className="px-4 py-3">{resource.title}</td>
-                    <td className="px-4 py-3">{resource.owner_name} ({resource.owner_email})</td>
-                    <td className="px-4 py-3">{resource.category}</td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleDeleteResource(resource.id)}
-                        className="btn btn-danger btn-sm"
-                      >
-                        Delete
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm text-slate-200">
+                <thead>
+                  <tr className="border-b border-slate-700/40 bg-slate-900/40">
+                    <th className="px-4 py-3">ID</th>
+                    <th className="px-4 py-3">Title</th>
+                    <th className="px-4 py-3">Owner</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 flex items-center justify-between text-slate-300">
-            <span>
-              Trang {resourcePagination.page} / {resourcePagination.totalPages} - Tổng {resourcePagination.total} tài nguyên
-            </span>
-            <div className="flex gap-2">
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setResourcePage((prev) => Math.max(prev - 1, 1))}
-                disabled={resourcePagination.page <= 1}
-              >
-                Trước
-              </button>
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setResourcePage((prev) => Math.min(prev + 1, resourcePagination.totalPages))}
-                disabled={resourcePagination.page >= resourcePagination.totalPages}
-              >
-                Sau
-              </button>
+                </thead>
+                <tbody>
+                  {resources.map((resource) => (
+                    <tr key={resource.id} className="border-t border-slate-800 hover:bg-slate-800/50">
+                      <td className="px-4 py-3">{resource.id}</td>
+                      <td className="px-4 py-3">{resource.title}</td>
+                      <td className="px-4 py-3">{resource.owner_name} ({resource.owner_email})</td>
+                      <td className="px-4 py-3">{resource.category}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end">
+                          <button onClick={() => handleDeleteResource(resource.id)} className="btn btn-danger btn-sm">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
-        </section>
+            <div className="flex items-center justify-between border-t border-slate-700/40 bg-slate-900/70 px-6 py-3 text-sm text-slate-300">
+              <span>
+                Trang {resourcePagination.page} / {resourcePagination.totalPages} - Tổng {resourcePagination.total} tài nguyên
+              </span>
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setResourcePage((prev) => Math.max(prev - 1, 1))}
+                  disabled={resourcePagination.page <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setResourcePage((prev) => Math.min(prev + 1, resourcePagination.totalPages))}
+                  disabled={resourcePagination.page >= resourcePagination.totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </section>
 
-        <section className="bg-slate-800 rounded-3xl p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-              <h2 className="text-2xl font-semibold text-white">Quản lý danh mục</h2>
-              <p className="text-slate-400 text-sm">
+          <section className="overflow-hidden rounded-xl border border-slate-700/30 bg-slate-900">
+            <div className="border-b border-slate-700/40 bg-slate-900/70 px-6 py-4">
+              <h2 className="text-xl font-bold text-white">Category Management</h2>
+              <p className="mt-1 text-sm text-slate-400">
                 {selectedUserId
                   ? `Hiển thị danh mục cho: ${selectedUserName}`
                   : 'Chọn một tài khoản để xem danh mục riêng của họ.'}
               </p>
             </div>
-          </div>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-left text-sm text-slate-200">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3">ID</th>
-                      <th className="px-4 py-3">Tên</th>
-                      <th className="px-4 py-3">Key</th>
-                      <th className="px-4 py-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {categories.map((category) => (
-                      <tr key={category.id} className="border-t border-slate-700">
-                        <td className="px-4 py-3">{category.id}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                             {category.name}
-                             {category.subcategories && category.subcategories.length > 0 && (
-                               <button 
-                                 onClick={() => setExpandedCategoryId(expandedCategoryId === category.id ? null : category.id)}
-                                 className="text-xs text-slate-400 hover:text-white ml-2 flex items-center gap-1 bg-slate-800 px-2 py-1 rounded"
-                               >
-                                 <span className="opacity-70 text-[10px]">Subcategories</span>
-                                 <span>{expandedCategoryId === category.id ? '▼' : '▶'}</span>
-                               </button>
-                             )}
-                          </div>
-                          {expandedCategoryId === category.id && category.subcategories && (
-                             <div className="mt-2 flex flex-wrap gap-1">
-                               {category.subcategories.map(sub => (
-                                 <span key={sub} className="inline-block bg-slate-700 text-slate-300 text-xs px-2 py-1 rounded">{sub}</span>
-                               ))}
-                             </div>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">{category.key}</td>
-                        <td className="px-4 py-3 flex gap-2">
+            <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm text-slate-200">
+              <thead>
+                <tr>
+                  <th className="px-4 py-3">ID</th>
+                  <th className="px-4 py-3">Tên</th>
+                  <th className="px-4 py-3">Key</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((category) => (
+                  <tr key={category.id} className="border-t border-slate-800 hover:bg-slate-800/50">
+                    <td className="px-4 py-3">{category.id}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {category.name}
+                        {category.subcategories && category.subcategories.length > 0 && (
                           <button
-                            onClick={() => handleEditCategory(category)}
-                            className="btn btn-secondary btn-sm"
+                            onClick={() => setExpandedCategoryId(expandedCategoryId === category.id ? null : category.id)}
+                            className="rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700"
                           >
-                            Edit
+                            {expandedCategoryId === category.id ? 'Ẩn sub' : 'Xem sub'}
                           </button>
-                          <button
-                            onClick={() => handleCategoryDelete(category.id)}
-                            className="btn btn-danger btn-sm"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 flex flex-col md:flex-row items-center justify-between text-slate-300 text-sm gap-2">
-                <span>
-                  Trang {categoryPagination.page} / {categoryPagination.totalPages} - Tổng {categoryPagination.total} danh mục
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => setCategoryPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={categoryPagination.page <= 1}
-                  >
-                    Trước
-                  </button>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => setCategoryPage((prev) => Math.min(prev + 1, categoryPagination.totalPages))}
-                    disabled={categoryPagination.page >= categoryPagination.totalPages}
-                  >
-                    Sau
-                  </button>
-                </div>
+                        )}
+                      </div>
+                      {expandedCategoryId === category.id && category.subcategories && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {category.subcategories.map((sub) => (
+                            <span key={sub} className="inline-block rounded bg-slate-700 px-2 py-1 text-xs text-slate-200">
+                              {sub}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">{category.key}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => handleEditCategory(category)}
+                        className="btn btn-secondary btn-sm"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleCategoryDelete(category.id)}
+                        className="btn btn-danger btn-sm"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+            <div className="flex items-center justify-between border-t border-slate-700/40 bg-slate-900/70 px-6 py-3 text-sm text-slate-300">
+              <span>
+                Trang {categoryPagination.page} / {categoryPagination.totalPages} - Tổng {categoryPagination.total} danh mục
+              </span>
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCategoryPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={categoryPagination.page <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCategoryPage((prev) => Math.min(prev + 1, categoryPagination.totalPages))}
+                  disabled={categoryPagination.page >= categoryPagination.totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             </div>
-
-            <div className="bg-slate-900 rounded-2xl p-4 self-start">
-              <h3 className="text-xl font-semibold text-white mb-4">
-                {editingCategory ? `Chỉnh sửa: ${editingCategory.name}` : 'Thêm danh mục mới'}
-              </h3>
-              {!selectedUserId && (
-                <div className="bg-slate-900 border border-yellow-600 text-yellow-200 p-4 rounded-lg mb-4 text-sm">
-                  Chọn một tài khoản để tạo danh mục cho tài khoản đó.
-                </div>
-              )}
-              <form onSubmit={handleCategorySubmit} className="space-y-4">
-                <div>
-                  <label className="block text-slate-300 mb-2">Tên danh mục</label>
-                  <input
-                    value={categoryForm.name}
-                    onChange={(e) => setCategoryForm((prev) => ({ ...prev, name: e.target.value }))}
-                    className="input w-full"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 mb-2">Key</label>
-                  <input
-                    value={categoryForm.key}
-                    onChange={(e) => setCategoryForm((prev) => ({ ...prev, key: e.target.value }))}
-                    className="input w-full"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 mb-2">Subcategories (comma separated)</label>
-                  <input
-                    value={categoryForm.subcategories}
-                    onChange={(e) => setCategoryForm((prev) => ({ ...prev, subcategories: e.target.value }))}
-                    className="input w-full"
-                    placeholder="API, Database, Authentication"
-                  />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button type="submit" className="btn btn-primary flex-1">
-                    {editingCategory ? 'Cập nhật' : 'Thêm mới'}
-                  </button>
-                  {editingCategory && (
-                    <button type="button" onClick={handleCancelEdit} className="btn btn-secondary flex-1">
-                      Hủy bỏ
-                    </button>
-                  )}
-                </div>
-              </form>
-            </div>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
+      </main>
     </div>
   );
 };

@@ -1,6 +1,8 @@
 // src/components/ResourceCard.jsx
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Server, Database, Network, Check } from 'lucide-react';
+import { motion } from 'motion/react';
 
 /**
  * ResourceCard Component
@@ -13,11 +15,11 @@ import { useTranslation } from 'react-i18next';
  * - Favorite button
  * - Action buttons (Edit, Delete, Visit)
  */
-const ResourceCard = ({ resource, onEdit, onDelete }) => {
+const ResourceCard = ({ resource, onEdit, onDelete, isSelected, onToggleSelect }) => {
   const { t } = useTranslation();
 
   const handleVisit = () => {
-    window.open(resource.url, '_blank');
+    window.open(resource.url, '_blank', 'noopener,noreferrer');
   };
 
   const handleEdit = () => {
@@ -40,54 +42,67 @@ const ResourceCard = ({ resource, onEdit, onDelete }) => {
     : [];
 
   const visibleTechnologies = technologies.slice(-2);
+  const lowerCategory = (resource.category || '').toLowerCase();
+  const Icon =
+    lowerCategory.includes('backend') || lowerCategory.includes('devops')
+      ? Server
+      : lowerCategory.includes('data') || lowerCategory.includes('database')
+      ? Database
+      : Network;
 
   return (
-    <div className="card bg-slate-800">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
-            {resource.title}
-          </h3>
+    <motion.article whileHover={{ y: -4 }} className={`rounded-2xl border p-6 transition-all duration-200 ${
+      isSelected 
+        ? 'bg-slate-800/95 border-blue-400/50 ring-4 ring-blue-500/10'
+        : 'bg-slate-800/80 border-transparent hover:border-slate-600/40 hover:bg-slate-800'
+    }`}>
+      <div className="mb-6 flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+            isSelected ? 'bg-blue-600/30 text-blue-200' : 'bg-slate-900 text-blue-300'
+          }`}>
+            <Icon className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="line-clamp-1 text-lg font-bold text-white">{resource.title}</h3>
+            <p className="font-mono text-xs text-slate-400">ID: RS-{resource.id}</p>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={() => onToggleSelect(resource.id)}
+          className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
+            isSelected ? 'border-blue-400 bg-blue-400 text-slate-950' : 'border-slate-500 text-transparent'
+          }`}
+        >
+          {isSelected && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+        </button>
       </div>
 
-      {/* Category & Subcategory Badges */}
-      <div className="mb-3 flex gap-2 items-center flex-wrap">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         {resource.category && (
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-            resource.category === 'Backend' ? 'bg-blue-600 text-white' :
-            resource.category === 'Frontend' ? 'bg-purple-600 text-white' :
-            resource.category === 'Algorithm' ? 'bg-green-600 text-white' :
-            resource.category === 'UI / Design' ? 'bg-pink-600 text-white' :
-            resource.category === 'Dev Tools' ? 'bg-yellow-600 text-white' :
-            resource.category === 'AI Tools' ? 'bg-orange-600 text-white' :
-            resource.category === 'Learning' ? 'bg-cyan-600 text-white' :
-            resource.category === 'DevOps' ? 'bg-red-600 text-white' :
-            resource.category === 'Testing' ? 'bg-indigo-600 text-white' :
-            resource.category === 'Productivity' ? 'bg-emerald-600 text-white' :
-            resource.category === 'History AI' ? 'bg-violet-600 text-white' :
-            resource.category === 'TIKTOK CHANNELS' ? 'bg-rose-600 text-white' :
-            resource.category === 'TikTok Photos' ? 'bg-fuchsia-600 text-white' :
-            'bg-gray-600 text-white'
-          }`}>
+          <span className="rounded bg-blue-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-200">
             {resource.category}
           </span>
         )}
         {resource.subcategory && (
-          <span className="inline-block px-2 py-1 rounded text-xs border border-slate-500 text-slate-300">
+          <span className="rounded bg-slate-700/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
             {resource.subcategory}
+          </span>
+        )}
+        {resource.source && (
+          <span className="rounded bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-200">
+            {resource.source}
           </span>
         )}
       </div>
 
-      {/* Technologies (show only last 2 tags) */}
       {technologies.length > 0 && (
-        <div className="mb-3">
-          <p className="text-xs text-slate-400 mb-1">🔧 Công nghệ:</p>
-          <div className="flex flex-wrap gap-2 items-center">
+        <div className="mb-4">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Technologies</p>
+          <div className="flex flex-wrap gap-2">
             {visibleTechnologies.map((tech) => (
-              <span key={tech} className="badge-secondary text-xs">
+              <span key={tech} className="rounded bg-slate-700/70 px-2 py-1 text-xs text-slate-200">
                 {tech}
               </span>
             ))}
@@ -95,75 +110,49 @@ const ResourceCard = ({ resource, onEdit, onDelete }) => {
         </div>
       )}
 
-      {/* Description - Mục đích sử dụng */}
       {resource.description && (
-        <div className="mb-3">
-          <p className="text-xs text-slate-400 mb-1">📝 Mục đích:</p>
-          <p className="text-slate-300 text-sm line-clamp-2">
-            {resource.description}
-          </p>
+        <div className="mb-4">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Description</p>
+          <p className="line-clamp-2 text-sm text-slate-300">{resource.description}</p>
         </div>
       )}
 
-      {/* Source - Nguồn */}
-      {resource.source && (
-        <div className="mb-3">
-          <p className="text-xs text-slate-400 mb-1">📌 Nguồn:</p>
-          <p className="text-slate-300 text-sm font-medium">
-            {resource.source}
-          </p>
+      <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-700/40 pt-4">
+        <div>
+          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Last update</span>
+          <div className="text-sm font-semibold text-slate-200">
+            {new Date(resource.updated_at || resource.created_at).toLocaleDateString('vi-VN')}
+          </div>
         </div>
-      )}
-
-      {/* Last Used Date */}
-      {resource.lastUsedDate && (
-        <div className="mb-3">
-          <p className="text-xs text-slate-400 mb-1">📅 Dùng gần nhất:</p>
-          <p className="text-slate-300 text-sm">
-            {new Date(resource.lastUsedDate).toLocaleDateString('vi-VN')}
-          </p>
+        <div>
+          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Selection</span>
+          <div className="text-sm font-semibold text-slate-200">{isSelected ? 'Selected' : 'Not selected'}</div>
         </div>
-      )}
+      </div>
 
-      {/* Notes */}
-      {resource.notes && (
-        <div className="mb-3">
-          <p className="text-xs text-slate-400 mb-1">💬 Ghi chú:</p>
-          <p className="text-slate-300 text-sm line-clamp-2">
-            {resource.notes}
-          </p>
-        </div>
-      )}
-
-      {/* Action Buttons */}
-      <div className="flex gap-2 mt-6 pt-4 border-t border-slate-700">
+      <div className="mt-5 flex gap-2 border-t border-slate-700/40 pt-4">
         <button
           onClick={handleVisit}
-          className="flex-1 btn btn-primary text-sm"
+          className="flex-1 rounded-xl bg-blue-500 px-3 py-2 text-sm font-semibold text-slate-950 transition-all hover:bg-blue-400"
         >
-          🌐 Mở →
+          Open
         </button>
         <button
           onClick={handleEdit}
           disabled={!onEdit}
-          className={`flex-1 btn btn-secondary text-sm ${!onEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`flex-1 rounded-xl bg-slate-700 px-3 py-2 text-sm font-semibold text-slate-100 transition-all hover:bg-slate-600 ${!onEdit ? 'cursor-not-allowed opacity-50' : ''}`}
         >
-          ✏️ Sửa
+          Edit
         </button>
         <button
           onClick={handleDelete}
           disabled={!onDelete}
-          className={`flex-1 btn btn-danger text-sm ${!onDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`flex-1 rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-all hover:bg-red-500 ${!onDelete ? 'cursor-not-allowed opacity-50' : ''}`}
         >
           Delete
         </button>
       </div>
-
-      {/* Meta */}
-      <p className="text-xs text-slate-500 mt-3">
-        Updated: {new Date(resource.updatedAt).toLocaleDateString()}
-      </p>
-    </div>
+    </motion.article>
   );
 };
 

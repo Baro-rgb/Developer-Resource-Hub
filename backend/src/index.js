@@ -3,6 +3,8 @@ require('dotenv').config();
 require('express-async-errors');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const { connectDB } = require('./config/database');
 const resourceRoutes = require('./routes/resourceRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -23,6 +25,31 @@ const errorHandler = require('./middleware/errorHandler');
  */
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
+const requiredInAllEnv = ['DATABASE_URL'];
+const requiredInProductionOnly = ['JWT_SECRET'];
+
+const missingAlways = requiredInAllEnv.filter((key) => !process.env[key]);
+const missingProdOnly = requiredInProductionOnly.filter((key) => !process.env[key]);
+
+if (missingAlways.length > 0) {
+  const message = `❌ Missing required environment variables: ${missingAlways.join(', ')}`;
+  throw new Error(message);
+}
+
+if (isProduction && missingProdOnly.length > 0) {
+  const message = `❌ Missing required environment variables: ${missingProdOnly.join(', ')}`;
+  throw new Error(message);
+}
+
+if (!isProduction && missingProdOnly.includes('JWT_SECRET')) {
+  console.warn('⚠️ JWT_SECRET is not set. Using development fallback secret.');
+}
+
+const toPositiveInt = (value, fallback) => {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
 
 // ==========================================
 // 1. MIDDLEWARE SETUP
@@ -32,10 +59,27 @@ const app = express();
 const corsOptions = {
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // API-only backend; avoid CSP conflicts in current setup
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
+    frameguard: { action: 'deny' },
+    referrerPolicy: { policy: 'no-referrer' },
+    hsts: isProduction
+      ? {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        }
+      : false,
+  })
+);
 
 // Body parser middleware
 app.use(express.json());
@@ -50,6 +94,17 @@ connectDB();
 // 3. ROUTES
 // ==========================================
 
+const globalApiLimiter = rateLimit({
+  windowMs: toPositiveInt(process.env.GLOBAL_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
+  limit: toPositiveInt(process.env.GLOBAL_RATE_LIMIT_MAX, 300),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many requests. Please try again later.',
+  },
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -58,6 +113,9 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Global API rate limit (excluding health endpoint above)
+app.use('/api', globalApiLimiter);
 
 // Resource API routes
 app.use('/api/resources', resourceRoutes);

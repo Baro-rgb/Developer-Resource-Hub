@@ -3,7 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../config/database');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'resourcehub_secret';
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  (process.env.NODE_ENV !== 'production' ? 'dev_local_jwt_secret_change_me' : null);
 const JWT_EXPIRES_IN = '7d';
 
 const createToken = (user) => {

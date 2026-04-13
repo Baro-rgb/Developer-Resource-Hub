@@ -139,6 +139,33 @@ export const createCategory = async (categoryData) => {
   }
 };
 
+export const bulkCreateResources = async (resources) => {
+  try {
+    const response = await apiClient.post('/resources/bulk', { resources });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const bulkDeleteResources = async (ids) => {
+  try {
+    const response = await apiClient.delete('/resources/bulk', { data: { ids } });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const bulkUpdateResources = async (ids, field, value, mode = 'replace') => {
+  try {
+    const response = await apiClient.patch('/resources/bulk', { ids, field, value, mode });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
 export const updateCategory = async (id, categoryData) => {
   try {
     const response = await apiClient.put(`/categories/${id}`, categoryData);

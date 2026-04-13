@@ -1,7 +1,9 @@
 // src/middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'resourcehub_secret';
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  (process.env.NODE_ENV !== 'production' ? 'dev_local_jwt_secret_change_me' : null);
 
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;

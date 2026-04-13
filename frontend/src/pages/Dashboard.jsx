@@ -1,15 +1,16 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Layers, PlusCircle, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useResources } from '../context/ResourceContext';
-import { getResources, deleteResource, updateResource } from '../services/api';
+import { getResources, deleteResource, getCategories } from '../services/api';
 import Sidebar from '../components/Sidebar';
 import SearchBar from '../components/SearchBar';
 import ResourceCard from '../components/ResourceCard';
 import ResourceForm from '../components/ResourceForm';
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import BulkToolModal from '../components/BulkToolModal';
 
 /**
  * Dashboard Page
@@ -25,23 +26,24 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
-  const { resources, setResources, pagination, setPagination, filters, loading, setLoading, error, setError } = useResources();
+  const { resources, setResources, pagination, setPagination, filters, updateFilters, loading, setLoading, error, setError } = useResources();
   const [showForm, setShowForm] = useState(false);
+  const [showBulkTool, setShowBulkTool] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const shouldShowCategoryGuide =
+    !filters.category && !filters.subcategory && !filters.search && !filters.source;
 
-  // Scroll to top khi mở/đóng form
-  useEffect(() => {
-    if (showForm) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const fetchResources = useCallback(async () => {
+    if (shouldShowCategoryGuide) {
+      setResources([]);
+      setPagination((prev) => ({ ...prev, total: 0, pages: 0, page: 1 }));
+      setLoading(false);
+      setError(null);
+      return;
     }
-  }, [showForm]);
 
-  // Fetch resources khi filters, pagination thay đổi
-  useEffect(() => {
-    fetchResources();
-  }, [filters.search, filters.category, filters.subcategory, filters.source, pagination.page]);
-
-  const fetchResources = async () => {
     setLoading(true);
     setError(null);
 
@@ -67,7 +69,36 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [shouldShowCategoryGuide, filters.search, filters.category, filters.subcategory, filters.source, pagination.page, pagination.limit, setLoading, setError, setResources, setPagination, t]);
+
+  // Scroll to top khi mở/đóng form
+  useEffect(() => {
+    if (showForm) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [showForm]);
+
+  // Fetch resources khi filters, pagination thay đổi
+  useEffect(() => {
+    fetchResources();
+    setSelectedIds([]); // Clear selection when page/filters change
+  }, [fetchResources, filters.search, filters.category, filters.subcategory, filters.source, pagination.page]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await getCategories();
+        const sorted = (response.data || []).sort((a, b) =>
+          a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' })
+        );
+        setCategories(sorted);
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const handleEdit = (resource) => {
     setEditingResource(resource);
@@ -98,6 +129,20 @@ const Dashboard = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleToggleSelect = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = (isAll) => {
+    if (isAll) {
+      setSelectedIds(resources.map(r => r.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
   if (showForm) {
     return (
       <div className="min-h-screen bg-slate-900 p-8">
@@ -111,46 +156,43 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              {t('common.title')}
-            </h1>
-            <p className="text-slate-400">
-              {t('common.subtitle')}
-            </p>
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <main className="pl-64 pt-16">
+        <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col p-10">
+          <div className="mb-8">
+            <SearchBar />
           </div>
-          <LanguageSwitcher />
-        </div>
 
-        {/* Add New Button */}
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            {isAuthenticated ? (
+          <header className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-extrabold tracking-tight text-white">Resource Management</h1>
+              <p className="max-w-md text-slate-400">
+                Orchestrate enterprise assets across global regions with high-fidelity telemetry.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowBulkTool(true)}
+                className={`flex items-center gap-2 rounded-xl px-6 py-2.5 font-semibold transition-colors ${
+                  selectedIds.length > 0 ? 'bg-blue-500/20 text-blue-200' : 'bg-slate-800 text-slate-100 hover:bg-slate-700'
+                }`}
+              >
+                <Layers className="h-5 w-5" />
+                {selectedIds.length > 0 ? `Bulk Action (${selectedIds.length})` : 'Bulk Action'}
+              </button>
               <button
                 onClick={() => setShowForm(true)}
-                className="btn btn-primary"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-400 to-blue-600 px-6 py-2.5 font-bold text-slate-950 shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95"
               >
-                ➕ {t('common.add')}
+                <PlusCircle className="h-5 w-5" />
+                Add Resource
               </button>
-            ) : (
-              <>
-                <Link to="/login" className="btn btn-secondary">
-                  Đăng nhập
-                </Link>
-                <Link to="/register" className="btn btn-primary">
-                  Đăng ký
-                </Link>
-              </>
-            )}
-          </div>
+            </div>
+          </header>
 
-          {isAuthenticated ? (
-            <div className="text-slate-200 flex flex-wrap items-center gap-3">
-              <span>
+          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-300">
                 Xin chào, <span className="font-semibold text-white">{user?.name || user?.email}</span>
               </span>
               {isAdmin && (
@@ -158,101 +200,155 @@ const Dashboard = () => {
                   Admin
                 </Link>
               )}
-              <button onClick={logout} className="ml-3 btn btn-ghost text-sm">
-                Đăng xuất
-              </button>
             </div>
-          ) : (
-            <div className="text-slate-400 text-sm">
-              Đăng nhập để thêm, sửa, xóa tài nguyên.
-            </div>
-          )}
-        </div>
-
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Sidebar />
+            {isAuthenticated ? (
+              <button onClick={logout} className="btn btn-secondary btn-sm">Đăng xuất</button>
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <span>Đăng nhập để chỉnh sửa:</span>
+                <Link to="/login" className="text-blue-300 hover:underline">Đăng nhập</Link>
+                <span>/</span>
+                <Link to="/register" className="text-blue-300 hover:underline">Đăng ký</Link>
+              </div>
+            )}
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Search Bar */}
-            <div className="mb-8">
-              <SearchBar />
-            </div>
+          <div className="grid grid-cols-1 gap-8">
+            <div>
+              {error && <div className="mb-6 rounded-lg bg-red-900/70 p-4 text-red-100">{error}</div>}
 
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-900 text-red-200 p-4 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
-
-            {/* Loading State */}
-            {loading && (
-              <div className="text-center py-12">
-                <p className="text-slate-400 text-lg">⏳ {t('common.loading')}</p>
-              </div>
-            )}
-
-            {/* Resources Grid */}
-            {!loading && resources.length > 0 && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  {resources.map((resource) => (
-                    <ResourceCard
-                      key={resource.id}
-                      resource={resource}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  ))}
+              {loading && (
+                <div className="py-12 text-center">
+                  <p className="text-lg text-slate-400">⏳ {t('common.loading')}</p>
                 </div>
+              )}
 
-                {/* Pagination */}
-                {pagination.pages > 1 && (
-                  <div className="flex justify-center gap-2 mt-8">
-                    <button
-                      disabled={pagination.page === 1}
-                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                      className="btn btn-secondary disabled:opacity-50"
-                    >
-                      ← {t('pagination.previous')}
-                    </button>
-                    <span className="flex items-center px-4 text-white">
-                      {t('pagination.page')} {pagination.page} {t('pagination.of')} {pagination.pages}
-                    </span>
-                    <button
-                      disabled={pagination.page === pagination.pages}
-                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                      className="btn btn-secondary disabled:opacity-50"
-                    >
-                      {t('pagination.next')} →
-                    </button>
+              {!loading && shouldShowCategoryGuide && (
+                <section className="group relative mb-10 overflow-hidden rounded-2xl border border-slate-700/30 bg-slate-900 p-8">
+                  <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl transition-colors duration-500 group-hover:bg-blue-500/20" />
+                  <div className="relative z-10 flex flex-col items-center gap-6 md:flex-row">
+                    <div className="rounded-2xl bg-slate-800 p-4 shadow-inner">
+                      <Lightbulb className="h-12 w-12 text-blue-300" />
+                    </div>
+                    <div>
+                      <h3 className="mb-2 text-xl font-bold text-white">Getting Started with Precision Filters</h3>
+                      <p className="max-w-2xl leading-relaxed text-slate-300">
+                        No specific filters are currently applied. Start by selecting a system category from the sidebar or use advanced search to narrow down your fleet.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {categories.slice(0, 6).map((cat) => (
+                          <button
+                            key={cat.key}
+                            onClick={() => {
+                              updateFilters({ category: cat.key, subcategory: '' });
+                              setPagination((prev) => ({ ...prev, page: 1 }));
+                            }}
+                            className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700"
+                          >
+                            {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </>
-            )}
+                </section>
+              )}
 
-            {/* Empty State */}
-            {!loading && resources.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-slate-400 text-lg mb-4">
-                  {t('messages.no_resources')}
-                </p>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="btn btn-primary"
-                >
-                  {t('form.add_resource')}
-                </button>
-              </div>
-            )}
+              {!loading && resources.length > 0 && (
+                <>
+                  <div className="mb-4 flex items-center justify-between rounded-lg border border-slate-700/30 bg-slate-900/70 p-3">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.length === resources.length && resources.length > 0}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
+                      />
+                      {selectedIds.length > 0 ? `Đã chọn ${selectedIds.length}` : 'Chọn tất cả trang này'}
+                    </label>
+                    {selectedIds.length > 0 && (
+                      <button onClick={() => setSelectedIds([])} className="text-xs text-slate-400 hover:text-white">
+                        Bỏ chọn
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {resources.map((resource) => (
+                      <ResourceCard
+                        key={resource.id}
+                        resource={resource}
+                        isSelected={selectedIds.includes(resource.id)}
+                        onToggleSelect={handleToggleSelect}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+
+                  {pagination.pages > 1 && (
+                    <footer className="flex items-center justify-between border-t border-slate-700/40 pt-8">
+                      <p className="text-sm font-medium text-slate-400">
+                        {t('pagination.page')} <span className="font-bold text-white">{pagination.page}</span> {t('pagination.of')} <span className="font-bold text-white">{pagination.pages}</span>
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          disabled={pagination.page === 1}
+                          onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
+                          className="rounded-lg border border-slate-700/40 p-2 text-slate-300 transition-all hover:bg-slate-800 disabled:opacity-30"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button className="h-10 w-10 rounded-lg bg-blue-500 font-bold text-slate-950">{pagination.page}</button>
+                        <button
+                          disabled={pagination.page === pagination.pages}
+                          onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
+                          className="rounded-lg border border-slate-700/40 p-2 text-slate-300 transition-all hover:bg-slate-800 disabled:opacity-30"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </footer>
+                  )}
+                </>
+              )}
+
+              {!loading && !shouldShowCategoryGuide && resources.length === 0 && (
+                <div className="py-12 text-center">
+                  <p className="mb-4 text-lg text-slate-400">{t('messages.no_resources')}</p>
+                  <button onClick={() => setShowForm(true)} className="btn btn-primary">
+                    {t('form.add_resource')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
+
+          <footer className="mt-10 flex items-center justify-between border-t border-slate-700/40 px-2 py-8 text-xs">
+            <div className="text-slate-500">© 2024 Digital Command. All rights reserved.</div>
+            <div className="flex gap-8">
+              <a className="text-slate-500 transition-all hover:text-slate-200" href="/" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+              <a className="text-slate-500 transition-all hover:text-slate-200" href="/" onClick={(e) => e.preventDefault()}>Terms of Service</a>
+              <a className="text-slate-500 transition-all hover:text-slate-200" href="/" onClick={(e) => e.preventDefault()}>Security</a>
+            </div>
+          </footer>
         </div>
-      </div>
+      </main>
+
+      <Sidebar />
+
+      {showBulkTool && (
+        <BulkToolModal 
+          initialMode={selectedIds.length > 0 ? 'edit' : 'import'}
+          selectedIds={selectedIds}
+          onClose={() => setShowBulkTool(false)}
+          onSuccess={() => {
+            fetchResources();
+            setSelectedIds([]);
+            setShowBulkTool(false);
+          }}
+        />
+      )}
     </div>
   );
 };

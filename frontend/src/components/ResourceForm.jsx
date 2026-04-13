@@ -48,7 +48,7 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
         description: initialData.description || '',
         notes: initialData.notes || '',
         source: initialData.source || '',
-        lastUsedDate: initialData.lastUsedDate || '',
+        lastUsedDate: initialData.last_used_date || '',
       });
     }
   }, [initialData]);
@@ -58,7 +58,10 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
     const loadCategories = async () => {
       try {
         const response = await getCategories();
-        setCategories(response.data || []);
+        const sorted = (response.data || []).sort((a, b) =>
+          a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' })
+        );
+        setCategories(sorted);
       } catch (err) {
         console.error('Failed to load categories:', err);
       }
@@ -128,7 +131,7 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
     if (!value) return '';
     const trimmed = value.trim();
     if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-    const parts = trimmed.split(/[-\/\.]/).map((part) => part.trim());
+    const parts = trimmed.split(/[-/.]/).map((part) => part.trim());
     if (parts.length === 3) {
       const [p1, p2, p3] = parts;
       if (p1.length === 4) {
@@ -219,6 +222,8 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
       ...formData,
       category: formData.category || null,
       subcategory: formData.subcategory || null,
+      description: formData.description?.trim() || null,
+      notes: formData.notes?.trim() || null,
       source: formData.source || null,
       lastUsedDate: formData.lastUsedDate || null,
     };
@@ -348,7 +353,10 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
               <option value="">-- Chọn chi tiết --</option>
               {categories
                 .find((cat) => cat.key === formData.category)
-                ?.subcategories?.map((subcat) => (
+                ?.subcategories
+                ?.slice()
+                .sort((a, b) => a.localeCompare(b, 'vi', { sensitivity: 'base' }))
+                .map((subcat) => (
                   <option key={subcat} value={subcat}>
                     {subcat}
                   </option>

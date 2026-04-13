@@ -1,4 +1,5 @@
 /* src/styles/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -60,6 +61,153 @@
   .badge-secondary {
     @apply badge bg-slate-600 text-white;
   }
+
+  /* Welcome page */
+  .welcome-section-inner {
+    @apply mx-auto w-full max-w-7xl px-4 md:px-8;
+  }
+
+  .welcome-glass-panel {
+    @apply rounded-2xl border border-slate-700/50 bg-slate-800/40 shadow-2xl backdrop-blur-xl;
+  }
+
+  .welcome-nav {
+    @apply fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-700/40 bg-slate-950/70 px-4 backdrop-blur-xl md:px-8;
+  }
+
+  .welcome-nav-left {
+    @apply flex items-center gap-8;
+  }
+
+  .welcome-brand {
+    @apply text-xl font-extrabold tracking-tight text-blue-300;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .welcome-nav-links {
+    @apply hidden items-center gap-6 md:flex;
+  }
+
+  .welcome-nav-link {
+    @apply text-sm text-slate-400 transition-colors hover:text-white;
+  }
+
+  .welcome-nav-right {
+    @apply flex items-center gap-3;
+  }
+
+  .welcome-nav-lang {
+    @apply rounded px-2 py-1 text-sm text-slate-300 transition hover:bg-slate-800 hover:text-white;
+  }
+
+  .welcome-nav-icon {
+    @apply h-5 w-5 cursor-pointer text-slate-400 transition-colors hover:text-white;
+  }
+
+  .welcome-avatar {
+    @apply h-8 w-8 overflow-hidden rounded-full border border-slate-600;
+  }
+
+  .welcome-hero {
+    @apply relative min-h-screen overflow-hidden bg-slate-950 px-4 pb-16 pt-24 md:px-10;
+  }
+
+  .welcome-hero-glow-right {
+    @apply pointer-events-none absolute right-0 top-1/4 h-[32rem] w-[32rem] -translate-y-1/2 rounded-full bg-blue-500/10 blur-[120px];
+  }
+
+  .welcome-hero-glow-left {
+    @apply pointer-events-none absolute bottom-0 left-0 h-[24rem] w-[24rem] translate-y-1/4 rounded-full bg-blue-900/20 blur-[110px];
+  }
+
+  .welcome-hero-grid {
+    @apply welcome-section-inner relative z-10 grid items-center gap-14 py-10 lg:grid-cols-12;
+  }
+
+  .welcome-hero-grid > :first-child {
+    @apply lg:col-span-7;
+  }
+
+  .welcome-hero-grid > :last-child {
+    @apply lg:col-span-5;
+  }
+
+  .welcome-chip {
+    @apply inline-flex items-center gap-3 rounded-full border border-blue-400/20 bg-slate-800/60 px-4 py-2;
+  }
+
+  .welcome-chip-text {
+    @apply text-[11px] font-bold uppercase tracking-[0.2em] text-blue-300;
+  }
+
+  .welcome-hero-title {
+    @apply text-5xl font-extrabold leading-tight tracking-tight text-white md:text-7xl;
+    font-family: 'Manrope', sans-serif;
+    text-shadow: 0 0 30px rgba(171, 199, 255, 0.22);
+  }
+
+  .welcome-hero-title-accent {
+    @apply bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent;
+  }
+
+  .welcome-hero-subtitle {
+    @apply max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl;
+  }
+
+  .welcome-btn-primary {
+    @apply inline-flex items-center gap-2 rounded-2xl bg-blue-400 px-7 py-4 font-bold text-slate-950 transition-all hover:-translate-y-0.5 hover:bg-blue-300;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .welcome-btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-slate-600 bg-slate-800/70 px-7 py-4 font-bold text-slate-100 transition-all hover:-translate-y-0.5 hover:bg-slate-700/80;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .welcome-benefits {
+    @apply grid gap-6 border-t border-slate-700/50 pt-8 md:grid-cols-3;
+  }
+
+  .welcome-benefit-item {
+    @apply flex items-start gap-3;
+  }
+
+  .welcome-benefit-title {
+    @apply text-sm font-bold text-white;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .welcome-benefit-desc {
+    @apply mt-1 text-xs text-slate-400;
+  }
+
+  .welcome-visual-wrapper {
+    @apply relative;
+  }
+
+  .welcome-float-card {
+    @apply absolute z-30 flex items-center gap-3 rounded-2xl border border-slate-600 bg-slate-900/80 p-4 shadow-xl backdrop-blur;
+  }
+
+  .welcome-float-card.top {
+    @apply -right-6 -top-6;
+  }
+
+  .welcome-float-card.bottom {
+    @apply -bottom-6 -left-6;
+  }
+
+  .welcome-features {
+    @apply relative overflow-hidden border-y border-slate-800 bg-slate-900/40 py-20;
+  }
+
+  .welcome-round-btn {
+    @apply flex h-11 w-11 items-center justify-center rounded-full border border-slate-600 text-slate-300 transition hover:bg-slate-800 hover:text-white;
+  }
+
+  .welcome-footer-link {
+    @apply text-sm text-slate-400 transition-colors hover:text-white;
+  }
 }
 
 /* Scrollbar styling */
@@ -78,4 +226,8 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+.bg-gradient-auth {
+  background: linear-gradient(135deg, #abc7ff 0%, #1764c3 100%);
 }

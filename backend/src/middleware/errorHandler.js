@@ -6,6 +6,7 @@
  * Trả về response lỗi chuẩn
  */
 const errorHandler = (err, req, res, next) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   // Mặc định error status là 500
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
@@ -45,6 +46,16 @@ const errorHandler = (err, req, res, next) => {
       message: 'Validation Error',
       errors,
     });
+  }
+
+  if (statusCode >= 500) {
+    console.error('Internal server error:', {
+      message: err.message,
+      stack: err.stack,
+      path: req.originalUrl,
+      method: req.method,
+    });
+    message = isProduction ? 'Internal Server Error' : message;
   }
 
   // Trả về error response

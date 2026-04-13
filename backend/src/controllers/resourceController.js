@@ -147,6 +147,80 @@ const createResource = async (req, res, next) => {
   }
 };
 
+// POST /resources/bulk - Tạo nhiều resources cùng lúc
+const bulkCreateResources = async (req, res, next) => {
+  try {
+    const { resources: items } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      const err = new Error('Resources array is required and must not be empty');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    if (items.length > 200) {
+      const err = new Error('Maximum 200 resources per bulk import');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const ownerId = req.user.id;
+    const results = [];
+    const errors = [];
+
+    // Insert in a transaction
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item.title || !item.url) {
+          errors.push({ index: i, title: item.title, reason: 'Title and URL are required' });
+          continue;
+        }
+        try {
+          const r = await client.query(
+            `INSERT INTO resources (owner_id, title, category, subcategory, url, technologies, description, notes, source, last_used_date)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+            [
+              ownerId,
+              item.title,
+              item.category || null,
+              item.subcategory || null,
+              item.url,
+              item.technologies || [],
+              item.description || null,
+              item.notes || null,
+              item.source || null,
+              item.lastUsedDate || null,
+            ]
+          );
+          results.push(r.rows[0]);
+        } catch (rowErr) {
+          errors.push({ index: i, title: item.title, reason: rowErr.message });
+        }
+      }
+
+      await client.query('COMMIT');
+    } catch (txErr) {
+      await client.query('ROLLBACK');
+      throw txErr;
+    } finally {
+      client.release();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Imported ${results.length} resources. ${errors.length} failed.`,
+      data: results,
+      errors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // PUT /resources/:id - Update resource
 const updateResource = async (req, res, next) => {
   try {
@@ -263,11 +337,92 @@ const getSources = async (req, res, next) => {
   }
 };
 
+// DELETE /resources/bulk - Xóa nhiều resources cùng lúc
+const bulkDeleteResources = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      const err = new Error('IDs array is required');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const result = await pool.query(
+      'DELETE FROM resources WHERE id = ANY($1) AND owner_id = $2 RETURNING id',
+      [ids, req.user.id]
+    );
+
+    res.json({
+      success: true,
+      message: `${result.rowCount} resources deleted successfully`,
+      data: result.rows.map(r => r.id),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PATCH /resources/bulk - Cập nhật nhiều resources cùng lúc
+const bulkUpdateResources = async (req, res, next) => {
+  try {
+    const { ids, field, value, mode = 'replace' } = req.body;
+    const allowedFields = ['category', 'subcategory', 'source'];
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      const err = new Error('IDs array is required');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    if (!allowedFields.includes(field)) {
+      const err = new Error(`Field ${field} is not allowed for bulk update`);
+      err.statusCode = 400;
+      return next(err);
+    }
+    if (!['replace', 'fill'].includes(mode)) {
+      const err = new Error('Mode must be either replace or fill');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const normalizedValue = value === '' ? null : value;
+    let query = '';
+    let params = [];
+
+    if (mode === 'fill') {
+      query = `UPDATE resources 
+               SET ${field} = $1, updated_at = NOW() 
+               WHERE id = ANY($2) AND owner_id = $3 AND (${field} IS NULL OR ${field} = '') 
+               RETURNING *`;
+      params = [normalizedValue, ids, req.user.id];
+    } else {
+      query = `UPDATE resources 
+               SET ${field} = $1, updated_at = NOW() 
+               WHERE id = ANY($2) AND owner_id = $3 
+               RETURNING *`;
+      params = [normalizedValue, ids, req.user.id];
+    }
+
+    const result = await pool.query(query, params);
+
+    res.json({
+      success: true,
+      message: `${result.rowCount} resources updated successfully`,
+      data: result.rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllResources,
   getResourceById,
   createResource,
+  bulkCreateResources,
   updateResource,
   deleteResource,
+  bulkDeleteResources,
+  bulkUpdateResources,
   getSources,
 };

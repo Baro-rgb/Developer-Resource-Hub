@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Welcome from './pages/Welcome';
 
 import Admin from './pages/Admin';
 import './styles/index.css';
@@ -40,6 +41,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/welcome" element={<Welcome />} />
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

@@ -73,10 +73,23 @@ const migrations = [
           ADD COLUMN IF NOT EXISTS owner_id INTEGER
         `);
 
+        const isProduction = process.env.NODE_ENV === 'production';
         const defaultMainEmail = process.env.DEFAULT_MAIN_ACCOUNT_EMAIL || 'main@resourcehub.local';
         const defaultMainPassword = process.env.DEFAULT_MAIN_ACCOUNT_PASSWORD || 'ResourceHub123!';
         const defaultAdminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@resourcehub.local';
         const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'AdminResource123!';
+
+        if (
+          isProduction &&
+          (
+            !process.env.DEFAULT_MAIN_ACCOUNT_PASSWORD ||
+            !process.env.DEFAULT_ADMIN_PASSWORD ||
+            defaultMainPassword === 'ResourceHub123!' ||
+            defaultAdminPassword === 'AdminResource123!'
+          )
+        ) {
+          throw new Error('Production requires strong DEFAULT_MAIN_ACCOUNT_PASSWORD and DEFAULT_ADMIN_PASSWORD env vars');
+        }
         const mainPasswordHash = await bcrypt.hash(defaultMainPassword, 10);
         const adminPasswordHash = await bcrypt.hash(defaultAdminPassword, 10);
 

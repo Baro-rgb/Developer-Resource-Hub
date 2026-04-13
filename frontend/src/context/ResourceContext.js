@@ -1,5 +1,5 @@
 // src/context/ResourceContext.js
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 /**
  * Resource Context
@@ -63,7 +63,7 @@ export const ResourceProvider = ({ children }) => {
     });
   }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     resources,
     setResources,
     pagination,
@@ -75,7 +75,7 @@ export const ResourceProvider = ({ children }) => {
     setLoading,
     error,
     setError,
-  };
+  }), [resources, pagination, filters, updateFilters, resetFilters, loading, error]);
 
   return (
     <ResourceContext.Provider value={value}>
