@@ -23,7 +23,30 @@
     "category": "Category",
     "subcategory": "Subcategory",
     "tags": "Tags",
-    "favorites_only": "Favorites Only"
+    "favorites_only": "Favorites Only",
+    "category_title": "CATEGORIES",
+    "clear_filters": "✕ Clear filters",
+    "nav_dashboard": "Dashboard",
+    "nav_resources": "Resources",
+    "nav_analytics": "Analytics",
+    "nav_admin": "Admin",
+    "nav_management": "Management"
+  },
+  "dashboard": {
+    "title": "Resource Management",
+    "subtitle": "Orchestrate enterprise assets across global regions with high-fidelity telemetry.",
+    "hello": "Hello",
+    "logout": "Sign Out",
+    "bulk_action": "Bulk Action",
+    "add_resource": "Add Resource",
+    "login_prompt": "Login to edit",
+    "login": "Login",
+    "register": "Register",
+    "guide_title": "Getting Started with Precision Filters",
+    "guide_desc": "No specific filters are currently applied. Start by selecting a system category from the sidebar or use advanced search to narrow down your fleet.",
+    "selected_count": "Selected {{count}}",
+    "select_all_page": "Select all on this page",
+    "deselect_all": "Deselect"
   },
   "form": {
     "title": "Resource Title",
@@ -49,9 +72,15 @@
     "by": "by",
     "open": "Open",
     "remove": "Remove",
+    "delete": "Delete",
     "edit": "Edit",
     "created": "Created",
-    "updated": "Updated"
+    "updated": "Updated",
+    "technologies": "TECHNOLOGIES",
+    "last_update": "Last update",
+    "selection": "Selection",
+    "selected": "Selected",
+    "not_selected": "Not selected"
   },
   "pagination": {
     "page": "Page",

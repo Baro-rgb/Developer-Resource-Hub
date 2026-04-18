@@ -123,12 +123,17 @@ const getAllResources = async (req, res, next) => {
     const total = parseInt(countResult.rows[0].count, 10);
     const totalPages = Math.ceil(total / limit) || 1;
 
+    const validSortFields = ['id', 'title', 'category', 'created_at'];
+    const sortBy = validSortFields.includes(req.query.sortBy) ? req.query.sortBy : 'created_at';
+    const order = (req.query.order || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const orderQuery = `ORDER BY r.${sortBy} ${order}`;
+
     const query = `
       SELECT r.*, u.name AS owner_name, u.email AS owner_email
       FROM resources r
       JOIN users u ON r.owner_id = u.id
       ${whereClause}
-      ORDER BY r.created_at DESC
+      ${orderQuery}
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `;
     const result = await pool.query(query, [...params, limit, offset]);

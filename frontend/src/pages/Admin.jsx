@@ -139,6 +139,8 @@ const Admin = () => {
   const [userPage, setUserPage] = useState(1);
   const [resourcePage, setResourcePage] = useState(1);
   const [categoryPage, setCategoryPage] = useState(1);
+  const [resourceSort, setResourceSort] = useState({ sortBy: 'created_at', order: 'DESC' });
+  const [categorySort, setCategorySort] = useState({ sortBy: 'name', order: 'ASC' });
   const [userPagination, setUserPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [resourcePagination, setResourcePagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [categoryPagination, setCategoryPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
@@ -161,8 +163,8 @@ const Admin = () => {
       try {
         const [usersResp, resourcesResp, categoriesResp] = await Promise.all([
           getAdminUsers({ page: userPage, limit: 10 }),
-          selectedUserId ? getAdminResources({ page: resourcePage, limit: 10, ownerId: selectedUserId }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
-          selectedUserId ? getCategories({ page: categoryPage, limit: 10, ownerId: selectedUserId }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
+          selectedUserId ? getAdminResources({ page: resourcePage, limit: 10, ownerId: selectedUserId, sortBy: resourceSort.sortBy, order: resourceSort.order }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
+          selectedUserId ? getCategories({ page: categoryPage, limit: 10, ownerId: selectedUserId, sortBy: categorySort.sortBy, order: categorySort.order }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
         ]);
         setUsers(usersResp.data);
         setResources(resourcesResp.data);
@@ -177,14 +179,14 @@ const Admin = () => {
     };
 
     loadData();
-  }, [isAuthenticated, isAdmin, userPage, resourcePage, categoryPage, selectedUserId]);
+  }, [isAuthenticated, isAdmin, userPage, resourcePage, categoryPage, selectedUserId, resourceSort, categorySort]);
 
   const refreshData = async () => {
     try {
       const [usersResp, resourcesResp, categoriesResp] = await Promise.all([
         getAdminUsers({ page: userPage, limit: 10 }),
-        selectedUserId ? getAdminResources({ page: resourcePage, limit: 10, ownerId: selectedUserId }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
-        selectedUserId ? getCategories({ page: categoryPage, limit: 10, ownerId: selectedUserId }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
+        selectedUserId ? getAdminResources({ page: resourcePage, limit: 10, ownerId: selectedUserId, sortBy: resourceSort.sortBy, order: resourceSort.order }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
+        selectedUserId ? getCategories({ page: categoryPage, limit: 10, ownerId: selectedUserId, sortBy: categorySort.sortBy, order: categorySort.order }) : Promise.resolve({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } }),
       ]);
       setUsers(usersResp.data);
       setResources(resourcesResp.data);
@@ -498,13 +500,36 @@ const Admin = () => {
           </div>
 
           <section className="overflow-hidden rounded-xl border border-slate-700/30 bg-slate-900">
-            <div className="border-b border-slate-700/40 bg-slate-900/70 px-6 py-4">
-              <h2 className="text-xl font-bold text-white">Resource Management</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                {selectedUserId
-                  ? `Hiển thị tài nguyên cho: ${selectedUserName}`
-                  : 'Chọn một tài khoản để xem tài nguyên riêng của họ.'}
-              </p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700/40 bg-slate-900/70 px-6 py-4 gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-white">Resource Management</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  {selectedUserId
+                    ? `Hiển thị tài nguyên cho: ${selectedUserName}`
+                    : 'Chọn một tài khoản để xem tài nguyên riêng của họ.'}
+                </p>
+              </div>
+              {selectedUserId && (
+                <div className="flex gap-2 items-center">
+                  <Filter className="h-4 w-4 text-slate-400 hidden sm:block" />
+                  <select 
+                    className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                    value={`${resourceSort.sortBy}-${resourceSort.order}`}
+                    onChange={(e) => {
+                      const [s, o] = e.target.value.split('-');
+                      setResourceSort({ sortBy: s, order: o });
+                      setResourcePage(1);
+                    }}
+                  >
+                    <option value="created_at-DESC">Mới nhất trước</option>
+                    <option value="created_at-ASC">Cũ nhất trước</option>
+                    <option value="title-ASC">Tên (A-Z)</option>
+                    <option value="title-DESC">Tên (Z-A)</option>
+                    <option value="id-DESC">ID lớn giảm dần</option>
+                    <option value="id-ASC">ID nhỏ tăng dần</option>
+                  </select>
+                </div>
+              )}
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm text-slate-200">
@@ -560,13 +585,36 @@ const Admin = () => {
           </section>
 
           <section className="overflow-hidden rounded-xl border border-slate-700/30 bg-slate-900">
-            <div className="border-b border-slate-700/40 bg-slate-900/70 px-6 py-4">
-              <h2 className="text-xl font-bold text-white">Category Management</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                {selectedUserId
-                  ? `Hiển thị danh mục cho: ${selectedUserName}`
-                  : 'Chọn một tài khoản để xem danh mục riêng của họ.'}
-              </p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700/40 bg-slate-900/70 px-6 py-4 gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-white">Category Management</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  {selectedUserId
+                    ? `Hiển thị danh mục cho: ${selectedUserName}`
+                    : 'Chọn một tài khoản để xem danh mục riêng của họ.'}
+                </p>
+              </div>
+              {selectedUserId && (
+                <div className="flex gap-2 items-center">
+                  <Filter className="h-4 w-4 text-slate-400 hidden sm:block" />
+                  <select 
+                    className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                    value={`${categorySort.sortBy}-${categorySort.order}`}
+                    onChange={(e) => {
+                      const [s, o] = e.target.value.split('-');
+                      setCategorySort({ sortBy: s, order: o });
+                      setCategoryPage(1);
+                    }}
+                  >
+                    <option value="name-ASC">Tên (A-Z)</option>
+                    <option value="name-DESC">Tên (Z-A)</option>
+                    <option value="created_at-DESC">Mới nhất trước</option>
+                    <option value="created_at-ASC">Cũ nhất trước</option>
+                    <option value="id-DESC">ID lớn giảm dần</option>
+                    <option value="id-ASC">ID nhỏ tăng dần</option>
+                  </select>
+                </div>
+              )}
             </div>
             <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm text-slate-200">

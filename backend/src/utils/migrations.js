@@ -195,24 +195,127 @@ const migrations = [
       }
     },
   },
+  {
+    id: '004_sync_existing_categories',
+    description: 'Sync existing resource categories and subcategories to the categories table',
+    up: async () => {
+      const client = await pool.connect();
+      try {
+        // Query all distinct category and subcategory from resources
+        const result = await client.query(`
+          SELECT owner_id, category, subcategory 
+          FROM resources 
+          WHERE category IS NOT NULL AND category != ''
+          GROUP BY owner_id, category, subcategory
+        `);
+
+        // Group by owner_id and category
+        const categoryMap = {};
+        for (const row of result.rows) {
+          const { owner_id, category, subcategory } = row;
+          if (!categoryMap[owner_id]) categoryMap[owner_id] = {};
+          if (!categoryMap[owner_id][category]) categoryMap[owner_id][category] = new Set();
+          
+          if (subcategory && subcategory.trim() !== '') {
+            categoryMap[owner_id][category].add(subcategory.trim());
+          }
+        }
+
+        // For each owner and category, ensure it exists in categories table and contains all subcategories
+        for (const ownerText of Object.keys(categoryMap)) {
+          const ownerId = parseInt(ownerText, 10);
+          for (const categoryName of Object.keys(categoryMap[ownerId])) {
+            const resourceSubcats = Array.from(categoryMap[ownerId][categoryName]);
+            
+            // Get existing category row
+            const existingCat = await client.query(
+              'SELECT id, subcategories FROM categories WHERE owner_id = $1 AND key = $2',
+              [ownerId, categoryName]
+            );
+
+            if (existingCat.rows.length === 0) {
+              // Category doesn't exist, create it
+              await client.query(
+                `INSERT INTO categories (owner_id, name, key, subcategories) VALUES ($1, $2, $3, $4)`,
+                [ownerId, categoryName, categoryName, JSON.stringify(resourceSubcats)]
+              );
+            } else {
+              // Category exists, merge subcategories
+              let dbSubcats = [];
+              try {
+                const subcatsRaw = existingCat.rows[0].subcategories;
+                dbSubcats = Array.isArray(subcatsRaw) ? subcatsRaw : JSON.parse(subcatsRaw);
+              } catch (e) {
+                dbSubcats = [];
+              }
+              
+              const mergedSubcats = Array.from(new Set([...dbSubcats, ...resourceSubcats]));
+              
+              await client.query(
+                'UPDATE categories SET subcategories = $1, updated_at = NOW() WHERE id = $2',
+                [JSON.stringify(mergedSubcats), existingCat.rows[0].id]
+              );
+            }
+          }
+        }
+
+        console.log('✅ Migration 004 completed: Synced missing categories/subcategories from resources');
+        return true;
+      } catch (error) {
+        console.error('❌ Migration 004 failed:', error.message);
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  },
 ];
 
 /**
  * Run all pending migrations
  */
 const runMigrations = async () => {
-  console.log('🔄 Running migrations...');
+  console.log('🔄 Checking database migrations...');
+  const client = await pool.connect();
   
-  for (const migration of migrations) {
-    try {
-      await migration.up();
-    } catch (error) {
-      console.error(`Failed to run migration ${migration.id}:`, error);
-      throw error;
+  try {
+    // Ensure migrations_history table exists
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS migrations_history (
+        id SERIAL PRIMARY KEY,
+        migration_id VARCHAR(100) UNIQUE NOT NULL,
+        executed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    // Get applied migrations
+    const appliedResult = await client.query('SELECT migration_id FROM migrations_history');
+    const appliedMigrations = new Set(appliedResult.rows.map(row => row.migration_id));
+
+    let migratedAny = false;
+
+    for (const migration of migrations) {
+      if (!appliedMigrations.has(migration.id)) {
+        console.log(`⏳ Running migration: ${migration.id} - ${migration.description}`);
+        try {
+          await migration.up();
+          await client.query('INSERT INTO migrations_history (migration_id) VALUES ($1)', [migration.id]);
+          migratedAny = true;
+        } catch (error) {
+          console.error(`❌ Failed to run migration ${migration.id}:`, error);
+          throw error;
+        }
+      }
     }
+    
+    if (migratedAny) {
+      console.log('✅ All new migrations completed successfully');
+    } else {
+      console.log('✅ Database is up to date, no new migrations to run.');
+    }
+  } finally {
+    client.release();
   }
-  
-  console.log('✅ All migrations completed successfully');
 };
 
 module.exports = {

@@ -10,18 +10,28 @@ const getCategories = async (req, res, next) => {
       const limit = req.query.limit ? Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 100) : 10;
       const offset = (page - 1) * limit;
 
+      const validSortFields = ['id', 'name', 'key', 'created_at'];
+      const sortBy = validSortFields.includes(req.query.sortBy) ? req.query.sortBy : 'name';
+      const order = (req.query.order || 'ASC').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+      const orderQuery = `ORDER BY ${sortBy} ${order}`;
+
       const countResult = await pool.query('SELECT COUNT(*) FROM categories WHERE owner_id = $1', [ownerId]);
       const total = parseInt(countResult.rows[0].count, 10);
       const totalPages = Math.ceil(total / limit) || 1;
 
       const result = await pool.query(
-        'SELECT id, owner_id, name, key, subcategories FROM categories WHERE owner_id = $1 ORDER BY name LIMIT $2 OFFSET $3',
+        `SELECT id, owner_id, name, key, subcategories FROM categories WHERE owner_id = $1 ${orderQuery} LIMIT $2 OFFSET $3`,
         [ownerId, limit, offset]
       );
       res.json({ success: true, data: result.rows, pagination: { page, limit, total, totalPages } });
     } else {
+      const validSortFields = ['id', 'name', 'key', 'created_at'];
+      const sortBy = validSortFields.includes(req.query.sortBy) ? req.query.sortBy : 'name';
+      const order = (req.query.order || 'ASC').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+      const orderQuery = `ORDER BY ${sortBy} ${order}`;
+
       const result = await pool.query(
-        'SELECT id, owner_id, name, key, subcategories FROM categories WHERE owner_id = $1 ORDER BY name',
+        `SELECT id, owner_id, name, key, subcategories FROM categories WHERE owner_id = $1 ${orderQuery}`,
         [ownerId]
       );
       res.json({ success: true, data: result.rows });

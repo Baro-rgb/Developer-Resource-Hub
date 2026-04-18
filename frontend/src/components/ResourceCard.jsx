@@ -99,7 +99,7 @@ const ResourceCard = ({ resource, onEdit, onDelete, isSelected, onToggleSelect }
 
       {technologies.length > 0 && (
         <div className="mb-4">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Technologies</p>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t('card.technologies')}</p>
           <div className="flex flex-wrap gap-2">
             {visibleTechnologies.map((tech) => (
               <span key={tech} className="rounded bg-slate-700/70 px-2 py-1 text-xs text-slate-200">
@@ -112,21 +112,21 @@ const ResourceCard = ({ resource, onEdit, onDelete, isSelected, onToggleSelect }
 
       {resource.description && (
         <div className="mb-4">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Description</p>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t('form.description')}</p>
           <p className="line-clamp-2 text-sm text-slate-300">{resource.description}</p>
         </div>
       )}
 
       <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-700/40 pt-4">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Last update</span>
+          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">{t('card.last_update')}</span>
           <div className="text-sm font-semibold text-slate-200">
             {new Date(resource.updated_at || resource.created_at).toLocaleDateString('vi-VN')}
           </div>
         </div>
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Selection</span>
-          <div className="text-sm font-semibold text-slate-200">{isSelected ? 'Selected' : 'Not selected'}</div>
+          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">{t('card.selection')}</span>
+          <div className="text-sm font-semibold text-slate-200">{isSelected ? t('card.selected') : t('card.not_selected')}</div>
         </div>
       </div>
 
@@ -135,21 +135,21 @@ const ResourceCard = ({ resource, onEdit, onDelete, isSelected, onToggleSelect }
           onClick={handleVisit}
           className="flex-1 rounded-xl bg-blue-500 px-3 py-2 text-sm font-semibold text-slate-950 transition-all hover:bg-blue-400"
         >
-          Open
+          {t('card.open')}
         </button>
         <button
           onClick={handleEdit}
           disabled={!onEdit}
           className={`flex-1 rounded-xl bg-slate-700 px-3 py-2 text-sm font-semibold text-slate-100 transition-all hover:bg-slate-600 ${!onEdit ? 'cursor-not-allowed opacity-50' : ''}`}
         >
-          Edit
+          {t('card.edit')}
         </button>
         <button
           onClick={handleDelete}
           disabled={!onDelete}
           className={`flex-1 rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-all hover:bg-red-500 ${!onDelete ? 'cursor-not-allowed opacity-50' : ''}`}
         >
-          Delete
+          {t('card.delete')}
         </button>
       </div>
     </motion.article>

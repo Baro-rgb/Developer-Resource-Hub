@@ -54,15 +54,15 @@ const Sidebar = () => {
 
   const selectedCategory = filters.category;
   const selectedSubcategories = selectedCategory
-    ? categories.find((cat) => cat.key === selectedCategory)?.subcategories || []
+    ? [...(categories.find((cat) => cat.key === selectedCategory)?.subcategories || [])].sort((a, b) => a.localeCompare(b, 'vi', { sensitivity: 'base' }))
     : [];
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', active: true },
-    { icon: Package, label: 'Resources' },
-    { icon: BarChart3, label: 'Analytics' },
-    { icon: ShieldCheck, label: 'Admin' },
-    { icon: Network, label: 'Management' },
+    { icon: LayoutDashboard, label: t('sidebar.nav_dashboard'), active: true },
+    { icon: Package, label: t('sidebar.nav_resources') },
+    { icon: BarChart3, label: t('sidebar.nav_analytics') },
+    { icon: ShieldCheck, label: t('sidebar.nav_admin') },
+    { icon: Network, label: t('sidebar.nav_management') },
   ];
 
   return (
@@ -96,7 +96,7 @@ const Sidebar = () => {
       </nav>
 
       <div className="flex-1 overflow-y-auto px-4">
-        <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">Categories</h2>
+        <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">{t('sidebar.category_title')}</h2>
         <div className="space-y-2">
           {categories.map((cat) => (
             <div key={cat.key}>
@@ -132,13 +132,18 @@ const Sidebar = () => {
             </div>
           ))}
         </div>
-
-        {(filters.category || filters.subcategory || filters.search || filters.source) && (
-          <button onClick={resetFilters} className="mt-4 w-full rounded-lg border border-slate-700 py-2 text-sm text-slate-200 hover:bg-slate-800">
-            ✕ Xóa bộ lọc
-          </button>
-        )}
       </div>
+
+      {(filters.category || filters.subcategory || filters.search || filters.source) && (
+        <div className="mt-4 shrink-0 px-4">
+          <button 
+            onClick={resetFilters} 
+            className="w-full rounded-lg border border-slate-600/50 bg-slate-800/50 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:bg-slate-700 hover:text-white"
+          >
+            {t('sidebar.clear_filters')}
+          </button>
+        </div>
+      )}
 
     </aside>
   );

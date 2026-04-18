@@ -29,7 +29,7 @@ export const ResourceProvider = ({ children }) => {
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
-    limit: 4,
+    limit: 6,
     pages: 0,
   });
 

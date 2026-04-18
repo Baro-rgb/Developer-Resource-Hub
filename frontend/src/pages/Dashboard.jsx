@@ -164,10 +164,10 @@ const Dashboard = () => {
           </div>
 
           <header className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div className="space-y-1">
-              <h1 className="text-4xl font-extrabold tracking-tight text-white">Resource Management</h1>
-              <p className="max-w-md text-slate-400">
-                Orchestrate enterprise assets across global regions with high-fidelity telemetry.
+            <div className="flex-1">
+              <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-white">{t('dashboard.title')}</h1>
+              <p className="text-sm text-slate-400">
+                {t('dashboard.subtitle')}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -178,37 +178,39 @@ const Dashboard = () => {
                 }`}
               >
                 <Layers className="h-5 w-5" />
-                {selectedIds.length > 0 ? `Bulk Action (${selectedIds.length})` : 'Bulk Action'}
+                {selectedIds.length > 0 ? `${t('dashboard.bulk_action')} (${selectedIds.length})` : t('dashboard.bulk_action')}
               </button>
               <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-400 to-blue-600 px-6 py-2.5 font-bold text-slate-950 shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95"
               >
                 <PlusCircle className="h-5 w-5" />
-                Add Resource
+                {t('dashboard.add_resource')}
               </button>
             </div>
           </header>
 
-          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-300">
-                Xin chào, <span className="font-semibold text-white">{user?.name || user?.email}</span>
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-700/50 pb-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-400">
+                {t('dashboard.hello')}, <span className="font-bold text-white">{user?.name}</span>
               </span>
               {isAdmin && (
-                <Link to="/admin" className="btn btn-secondary btn-sm">
+                <Link to="/admin" className="rounded-lg bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-400 hover:bg-blue-500/20">
                   Admin
                 </Link>
               )}
             </div>
             {isAuthenticated ? (
-              <button onClick={logout} className="btn btn-secondary btn-sm">Đăng xuất</button>
+              <button onClick={logout} className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 transition-colors hover:bg-slate-700 hover:text-white">
+                {t('dashboard.logout')}
+              </button>
             ) : (
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <span>Đăng nhập để chỉnh sửa:</span>
-                <Link to="/login" className="text-blue-300 hover:underline">Đăng nhập</Link>
+                <span>{t('dashboard.login_prompt')}:</span>
+                <Link to="/login" className="text-blue-300 hover:underline">{t('dashboard.login')}</Link>
                 <span>/</span>
-                <Link to="/register" className="text-blue-300 hover:underline">Đăng ký</Link>
+                <Link to="/register" className="text-blue-300 hover:underline">{t('dashboard.register')}</Link>
               </div>
             )}
           </div>
@@ -224,16 +226,17 @@ const Dashboard = () => {
               )}
 
               {!loading && shouldShowCategoryGuide && (
-                <section className="group relative mb-10 overflow-hidden rounded-2xl border border-slate-700/30 bg-slate-900 p-8">
-                  <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl transition-colors duration-500 group-hover:bg-blue-500/20" />
-                  <div className="relative z-10 flex flex-col items-center gap-6 md:flex-row">
-                    <div className="rounded-2xl bg-slate-800 p-4 shadow-inner">
-                      <Lightbulb className="h-12 w-12 text-blue-300" />
+                <div className="mb-8 overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-slate-900 to-slate-950 p-8 shadow-2xl relative">
+                  <div className="absolute top-0 right-0 p-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                  
+                  <div className="flex items-start gap-6 relative z-10">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                      <Lightbulb className="h-8 w-8 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
                     </div>
                     <div>
-                      <h3 className="mb-2 text-xl font-bold text-white">Getting Started with Precision Filters</h3>
-                      <p className="max-w-2xl leading-relaxed text-slate-300">
-                        No specific filters are currently applied. Start by selecting a system category from the sidebar or use advanced search to narrow down your fleet.
+                      <h2 className="mb-3 text-xl font-bold text-white tracking-tight">{t('dashboard.guide_title')}</h2>
+                      <p className="mb-6 max-w-2xl text-sm leading-relaxed text-slate-400">
+                        {t('dashboard.guide_desc')}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         {categories.slice(0, 6).map((cat) => (
@@ -251,7 +254,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                </section>
+                </div>
               )}
 
               {!loading && resources.length > 0 && (
@@ -264,11 +267,11 @@ const Dashboard = () => {
                         onChange={(e) => handleSelectAll(e.target.checked)}
                         className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
                       />
-                      {selectedIds.length > 0 ? `Đã chọn ${selectedIds.length}` : 'Chọn tất cả trang này'}
+                      {selectedIds.length > 0 ? t('dashboard.selected_count', { count: selectedIds.length }) : t('dashboard.select_all_page')}
                     </label>
                     {selectedIds.length > 0 && (
                       <button onClick={() => setSelectedIds([])} className="text-xs text-slate-400 hover:text-white">
-                        Bỏ chọn
+                        {t('dashboard.deselect_all')}
                       </button>
                     )}
                   </div>

@@ -23,7 +23,30 @@
     "category": "Danh mục",
     "subcategory": "Danh mục con",
     "tags": "Thẻ",
-    "favorites_only": "Chỉ Yêu thích"
+    "favorites_only": "Chỉ Yêu thích",
+    "category_title": "DANH MỤC",
+    "clear_filters": "✕ Xóa bộ lọc",
+    "nav_dashboard": "Bảng điều khiển",
+    "nav_resources": "Tài nguyên",
+    "nav_analytics": "Phân tích",
+    "nav_admin": "Quản trị",
+    "nav_management": "Quản lý"
+  },
+  "dashboard": {
+    "title": "Quản lý Tài Nguyên",
+    "subtitle": "Điều phối tài sản doanh nghiệp trên các khu vực với độ chính xác cao.",
+    "hello": "Xin chào",
+    "logout": "Đăng xuất",
+    "bulk_action": "Xử lý hàng loạt",
+    "add_resource": "Thêm Tài nguyên",
+    "login_prompt": "Đăng nhập để chỉnh sửa",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "guide_title": "Bắt đầu với Bộ lọc chính xác",
+    "guide_desc": "Chưa có bộ lọc cụ thể nào được áp dụng. Bắt đầu bằng cách chọn một danh mục từ thanh bên hoặc sử dụng tìm kiếm nâng cao.",
+    "selected_count": "Đã chọn {{count}}",
+    "select_all_page": "Chọn tất cả trang này",
+    "deselect_all": "Bỏ chọn"
   },
   "form": {
     "title": "Tiêu đề Tài Nguyên",
@@ -49,9 +72,15 @@
     "by": "bởi",
     "open": "Mở",
     "remove": "Xóa",
+    "delete": "Xóa",
     "edit": "Sửa",
     "created": "Tạo",
-    "updated": "Cập nhật"
+    "updated": "Cập nhật",
+    "technologies": "CÔNG NGHỆ",
+    "last_update": "Cập nhật lần cuối",
+    "selection": "Lựa chọn",
+    "selected": "Đã chọn",
+    "not_selected": "Chưa chọn"
   },
   "pagination": {
     "page": "Trang",

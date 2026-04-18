@@ -353,7 +353,10 @@ const BulkToolModal = ({ initialMode = 'import', selectedIds = [], onClose, onSu
                           required
                         >
                           <option value="">-- Chọn subcategory --</option>
-                          {(categories.find((c) => c.key === subcategoryCategory)?.subcategories || []).map((sub) => (
+                          {(categories.find((c) => c.key === subcategoryCategory)?.subcategories || [])
+                            .slice()
+                            .sort((a, b) => a.localeCompare(b, 'vi', { sensitivity: 'base' }))
+                            .map((sub) => (
                             <option key={sub} value={sub}>{sub}</option>
                           ))}
                           <option value="__custom__">+ Nhập subcategory mới</option>
