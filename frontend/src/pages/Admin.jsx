@@ -169,9 +169,9 @@ const Admin = () => {
         setUsers(usersResp.data);
         setResources(resourcesResp.data);
         setCategories(categoriesResp.data);
-        setUserPagination(usersResp.pagination || userPagination);
-        setResourcePagination(resourcesResp.pagination || resourcePagination);
-        setCategoryPagination(categoriesResp.pagination || categoryPagination);
+        setUserPagination(prev => usersResp.pagination || prev);
+        setResourcePagination(prev => resourcesResp.pagination || prev);
+        setCategoryPagination(prev => categoriesResp.pagination || prev);
       } catch (err) {
         console.error(err);
         setError(err.message || 'Failed to load admin data');
@@ -191,9 +191,9 @@ const Admin = () => {
       setUsers(usersResp.data);
       setResources(resourcesResp.data);
       setCategories(categoriesResp.data);
-      setUserPagination(usersResp.pagination || userPagination);
-      setResourcePagination(resourcesResp.pagination || resourcePagination);
-      setCategoryPagination(categoriesResp.pagination || categoryPagination);
+      setUserPagination(prev => usersResp.pagination || prev);
+      setResourcePagination(prev => resourcesResp.pagination || prev);
+      setCategoryPagination(prev => categoriesResp.pagination || prev);
     } catch (err) {
       console.error(err);
     }
