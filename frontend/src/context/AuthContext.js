@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   const saveSession = (token, userData) => {
     localStorage.setItem('auth_token', token);
+    localStorage.setItem('last_activity', Date.now().toString());
     setUser({ ...userData, isAdmin: userData?.is_admin || false });
   };
 
@@ -49,6 +50,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const profileResponse = await getProfile();
         setUser({ ...profileResponse.data, isAdmin: profileResponse.data?.is_admin || false });
+        localStorage.setItem('last_activity', Date.now().toString());
       } catch (error) {
         logout();
       } finally {
@@ -57,6 +59,44 @@ export const AuthProvider = ({ children }) => {
     };
 
     initialize();
+  }, [logout]);
+
+  // Session Timeout Logic (30 minutes of inactivity)
+  useEffect(() => {
+    const INACTIVITY_LIMIT_MS = 30 * 60 * 1000;
+    let activityTimeout = null;
+
+    const checkInactivity = () => {
+      const lastActivity = localStorage.getItem('last_activity');
+      if (lastActivity && Date.now() - parseInt(lastActivity, 10) > INACTIVITY_LIMIT_MS) {
+        if (localStorage.getItem('auth_token')) {
+          logout();
+          alert('Phiên đăng nhập đã hết hạn do không hoạt động (30 phút). Vui lòng đăng nhập lại.');
+        }
+      }
+    };
+
+    const updateActivity = () => {
+      // Allow debouncing memory setting so we aren't writing on every single mousemove
+      if (localStorage.getItem('auth_token')) {
+        localStorage.setItem('last_activity', Date.now().toString());
+      }
+    };
+
+    // Run initial check
+    checkInactivity();
+
+    // Only attach events if we actually are using the app
+    const events = ['mousemove', 'keydown', 'scroll', 'click'];
+    events.forEach(evt => window.addEventListener(evt, updateActivity, { passive: true }));
+
+    // Real-time background checker every 1 minute
+    const intervalId = setInterval(checkInactivity, 60000);
+
+    return () => {
+      events.forEach(evt => window.removeEventListener(evt, updateActivity));
+      clearInterval(intervalId);
+    };
   }, [logout]);
 
   const isAdmin = Boolean(user?.isAdmin || user?.is_admin);

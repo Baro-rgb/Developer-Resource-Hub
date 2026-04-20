@@ -28,7 +28,7 @@ const HomeRoute = () => {
     );
   }
 
-  return isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <Dashboard /> : <Welcome />;
 };
 
 function App() {
