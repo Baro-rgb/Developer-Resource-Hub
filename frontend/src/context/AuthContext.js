@@ -64,7 +64,6 @@ export const AuthProvider = ({ children }) => {
   // Session Timeout Logic (30 minutes of inactivity)
   useEffect(() => {
     const INACTIVITY_LIMIT_MS = 30 * 60 * 1000;
-    let activityTimeout = null;
 
     const checkInactivity = () => {
       const lastActivity = localStorage.getItem('last_activity');
