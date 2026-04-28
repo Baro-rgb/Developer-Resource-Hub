@@ -2,10 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, X, Loader2 } from 'lucide-react';
 import { getNotifications, respondToNotification } from '../services/api';
-import { useTranslation } from 'react-i18next';
-
 const NotificationBell = ({ onResourceAdded }) => {
-  const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);

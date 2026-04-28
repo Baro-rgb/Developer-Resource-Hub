@@ -2,10 +2,7 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, Share2, Mail, Send } from 'lucide-react';
 import { generateShareLink, sendNotification } from '../services/api';
-import { useTranslation } from 'react-i18next';
-
 const ShareModal = ({ resource, onClose }) => {
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('link'); // 'link' or 'email'
   const [shareLink, setShareLink] = useState('');
