@@ -1,7 +1,7 @@
 // src/components/ResourceCard.jsx
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Server, Database, Network, Check } from 'lucide-react';
+import { Server, Database, Network, Check, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 /**
@@ -15,7 +15,7 @@ import { motion } from 'motion/react';
  * - Favorite button
  * - Action buttons (Edit, Delete, Visit)
  */
-const ResourceCard = ({ resource, onEdit, onDelete, isSelected, onToggleSelect }) => {
+const ResourceCard = ({ resource, onEdit, onDelete, isSelected, onToggleSelect, onShare }) => {
   const { t } = useTranslation();
 
   const handleVisit = () => {
@@ -151,6 +151,15 @@ const ResourceCard = ({ resource, onEdit, onDelete, isSelected, onToggleSelect }
         >
           {t('card.delete')}
         </button>
+        {onShare && (
+          <button
+            onClick={() => onShare(resource)}
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all border border-indigo-500/20"
+            title="Chia sẻ"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </motion.article>
   );

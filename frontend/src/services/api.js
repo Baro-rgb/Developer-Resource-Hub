@@ -239,6 +239,64 @@ export const deleteAdminResource = async (id) => {
   }
 };
 
+// Share endpoints
+export const generateShareLink = async (resource_id) => {
+  try {
+    const response = await apiClient.post('/shares/generate', { resource_id });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const previewShareLink = async (token) => {
+  try {
+    // Không dùng apiClient vì apiClient có interceptor tự báo lỗi Auth nếu token hết hạn (tuy nhiên preview k cần đăng nhập)
+    // Nhưng thiết kế ở đây apiClient đã ok, ta cứ dùng
+    const response = await apiClient.get(`/shares/preview/${token}`);
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const importShareLink = async (token) => {
+  try {
+    const response = await apiClient.post(`/shares/import/${token}`);
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+// Notification endpoints
+export const sendNotification = async (recipient_email, resource_id) => {
+  try {
+    const response = await apiClient.post('/notifications/send', { recipient_email, resource_id });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const getNotifications = async () => {
+  try {
+    const response = await apiClient.get('/notifications');
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const respondToNotification = async (id, action) => {
+  try {
+    const response = await apiClient.post(`/notifications/${id}/respond`, { action });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
 /**
  * Error handler
  * @param {Error} error - Error object từ axios

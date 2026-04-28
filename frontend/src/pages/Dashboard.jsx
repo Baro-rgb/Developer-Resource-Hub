@@ -11,6 +11,10 @@ import SearchBar from '../components/SearchBar';
 import ResourceCard from '../components/ResourceCard';
 import ResourceForm from '../components/ResourceForm';
 import BulkToolModal from '../components/BulkToolModal';
+import ShareModal from '../components/ShareModal';
+import ImportShareModal from '../components/ImportShareModal';
+import NotificationBell from '../components/NotificationBell';
+import { Download } from 'lucide-react';
 
 /**
  * Dashboard Page
@@ -32,6 +36,9 @@ const Dashboard = () => {
   const [editingResource, setEditingResource] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [shareResource, setShareResource] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
   const shouldShowCategoryGuide =
     !filters.category && !filters.subcategory && !filters.search && !filters.source;
 
@@ -81,7 +88,6 @@ const Dashboard = () => {
   // Fetch resources khi filters, pagination thay đổi
   useEffect(() => {
     fetchResources();
-    setSelectedIds([]); // Clear selection when page/filters change
   }, [fetchResources, filters.search, filters.category, filters.subcategory, filters.source, pagination.page]);
 
   useEffect(() => {
@@ -136,10 +142,11 @@ const Dashboard = () => {
   };
 
   const handleSelectAll = (isAll) => {
+    const currentPageIds = resources.map(r => r.id);
     if (isAll) {
-      setSelectedIds(resources.map(r => r.id));
+      setSelectedIds(prev => Array.from(new Set([...prev, ...currentPageIds])));
     } else {
-      setSelectedIds([]);
+      setSelectedIds(prev => prev.filter(id => !currentPageIds.includes(id)));
     }
   };
 
@@ -181,6 +188,13 @@ const Dashboard = () => {
                 {selectedIds.length > 0 ? `${t('dashboard.bulk_action')} (${selectedIds.length})` : t('dashboard.bulk_action')}
               </button>
               <button
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 rounded-xl bg-slate-800 border border-emerald-500/30 px-6 py-2.5 font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all"
+              >
+                <Download className="h-5 w-5" />
+                Nhập mã Chia sẻ
+              </button>
+              <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-400 to-blue-600 px-6 py-2.5 font-bold text-slate-950 shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95"
               >
@@ -202,9 +216,16 @@ const Dashboard = () => {
               )}
             </div>
             {isAuthenticated ? (
-              <button onClick={logout} className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 transition-colors hover:bg-slate-700 hover:text-white">
-                {t('dashboard.logout')}
-              </button>
+              <div className="flex items-center gap-4">
+                <NotificationBell onResourceAdded={() => {
+                  fetchResources();
+                  setToastMessage('Đã nhận tài nguyên chia sẻ thành công!');
+                  setTimeout(() => setToastMessage(null), 3000);
+                }} />
+                <button onClick={logout} className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 transition-colors hover:bg-slate-700 hover:text-white">
+                  {t('dashboard.logout')}
+                </button>
+              </div>
             ) : (
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <span>{t('dashboard.login_prompt')}:</span>
@@ -263,7 +284,7 @@ const Dashboard = () => {
                     <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors">
                       <input
                         type="checkbox"
-                        checked={selectedIds.length === resources.length && resources.length > 0}
+                        checked={resources.length > 0 && resources.every(r => selectedIds.includes(r.id))}
                         onChange={(e) => handleSelectAll(e.target.checked)}
                         className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
                       />
@@ -285,6 +306,7 @@ const Dashboard = () => {
                         onToggleSelect={handleToggleSelect}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        onShare={(res) => setShareResource(res)}
                       />
                     ))}
                   </div>
@@ -351,6 +373,28 @@ const Dashboard = () => {
             setShowBulkTool(false);
           }}
         />
+      )}
+
+      {shareResource && (
+        <ShareModal resource={shareResource} onClose={() => setShareResource(null)} />
+      )}
+
+      {showImportModal && (
+        <ImportShareModal 
+          onClose={() => setShowImportModal(false)} 
+          onSuccess={(msg) => {
+            setToastMessage(msg);
+            fetchResources();
+            setTimeout(() => setToastMessage(null), 3000);
+          }}
+        />
+      )}
+
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[100] bg-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl border border-emerald-400/50 font-medium flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
+          <div className="bg-white/20 p-1 rounded-full"><Layers className="h-4 w-4 text-white" /></div>
+          {toastMessage}
+        </div>
       )}
     </div>
   );

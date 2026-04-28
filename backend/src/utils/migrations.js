@@ -269,6 +269,48 @@ const migrations = [
       }
     },
   },
+  {
+    id: '005_sharing_and_notifications',
+    description: 'Create shared_links and notifications tables for resource sharing',
+    up: async () => {
+      const client = await pool.connect();
+      try {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS shared_links (
+            id SERIAL PRIMARY KEY,
+            resource_id INTEGER NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+            share_token VARCHAR(100) UNIQUE NOT NULL,
+            created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            expires_at TIMESTAMP WITH TIME ZONE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          )
+        `);
+
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS notifications (
+            id SERIAL PRIMARY KEY,
+            recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            resource_id INTEGER NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          )
+        `);
+
+        await client.query('CREATE INDEX IF NOT EXISTS idx_shared_links_token ON shared_links(share_token)');
+        await client.query('CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient_id)');
+
+        console.log('✅ Migration 005 completed: Created sharing tables');
+        return true;
+      } catch (error) {
+        console.error('❌ Migration 005 failed:', error.message);
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  },
 ];
 
 /**
