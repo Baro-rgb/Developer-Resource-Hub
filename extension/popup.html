@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Save to Hub</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h2>Save to Hub</h2>
+      <button id="settingsBtn" title="Settings">⚙️</button>
+    </header>
+
+    <div id="authSection" class="section">
+      <p class="desc">Vui lòng nhập Token từ trang Web của bạn để cấp quyền.</p>
+      <input type="text" id="tokenInput" placeholder="Dán JWT Token vào đây..." />
+      <button id="saveTokenBtn" class="btn primary">Lưu Token</button>
+      <p id="authMsg" class="msg"></p>
+    </div>
+
+    <div id="saveSection" class="section hidden">
+      <div class="url-box">
+        <label>Đường dẫn (URL)</label>
+        <input type="text" id="urlInput" placeholder="https://..." />
+      </div>
+
+      <div class="btn-group">
+        <button id="fetchBtn" class="btn primary">Quét & Lưu (AI)</button>
+      </div>
+      
+      <div id="statusBox" class="status-box hidden">
+        <div class="loader" id="loader"></div>
+        <p id="statusMsg">Đang phân tích...</p>
+      </div>
+
+      <button id="logoutBtn" class="btn secondary mt-4">Xóa Token (Đăng xuất)</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

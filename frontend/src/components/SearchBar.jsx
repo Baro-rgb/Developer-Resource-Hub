@@ -42,8 +42,8 @@ const SearchBar = () => {
 
   const handleClear = () => {
     setSearchInput('');
-    updateFilters({ search: '' });
-    setPagination(prev => ({ ...prev, page: 1 }));
+    // Let the debounce effect handle the updateFilters call 
+    // to prevent the race condition that reverts the clear
   };
 
   return (

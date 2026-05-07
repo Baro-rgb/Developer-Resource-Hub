@@ -1,7 +1,7 @@
 // src/components/ResourceForm.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createResource, updateResource, getCategories } from '../services/api';
+import { createResource, updateResource, getCategories, fetchMetadata } from '../services/api';
 
 /**
  * ResourceForm Component
@@ -31,6 +31,7 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
   const [techInput, setTechInput] = useState('');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isFetchingMeta, setIsFetchingMeta] = useState(false);
   const [error, setError] = useState(null);
 
   const sources = ['Tiktok', 'YouTube', 'Facebook', 'Twitter', 'Blog', 'GitHub', 'Khác'];
@@ -88,6 +89,35 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleAutoFetch = async () => {
+    // If URL is empty, skip auto-fetch
+    if (!formData.url) return;
+    
+    // Simple URL validation
+    if (!formData.url.startsWith('http')) return;
+
+    try {
+      setIsFetchingMeta(true);
+      const res = await fetchMetadata(formData.url);
+      if (res && res.data) {
+        const data = res.data;
+        setFormData(prev => ({
+          ...prev,
+          title: prev.title || data.title || '',
+          description: prev.description || data.description || '',
+          category: prev.category || data.category || '',
+          subcategory: prev.subcategory || data.subcategory || '',
+          notes: prev.notes || data.notes || '',
+          technologies: prev.technologies.length > 0 ? prev.technologies : (data.technologies || [])
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to auto-fetch metadata:', err);
+    } finally {
+      setIsFetchingMeta(false);
+    }
   };
 
   // Add technology - Auto-split by comma
@@ -334,7 +364,7 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
         </div>
 
         {/* Subcategory - CHI TIẾT DANH MỤC */}
-        {formData.category && categories.find((cat) => cat.key === formData.category)?.subcategories?.length > 0 && (
+        {(formData.category && categories.find((cat) => cat.key === formData.category)?.subcategories?.length > 0) || formData.subcategory ? (
           <div>
             <label className="block text-white font-medium mb-2">
               CHI TIẾT DANH MỤC
@@ -351,34 +381,64 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
               className="input"
             >
               <option value="">-- Chọn chi tiết --</option>
-              {categories
-                .find((cat) => cat.key === formData.category)
-                ?.subcategories
-                ?.slice()
-                .sort((a, b) => a.localeCompare(b, 'vi', { sensitivity: 'base' }))
-                .map((subcat) => (
+              {(() => {
+                // Get existing subcategories
+                const existingSubs = categories
+                  .find((cat) => cat.key === formData.category)
+                  ?.subcategories
+                  ?.slice()
+                  .sort((a, b) => a.localeCompare(b, 'vi', { sensitivity: 'base' })) || [];
+                
+                // Add AI generated subcategory if it's new
+                const allSubs = [...existingSubs];
+                if (formData.subcategory && !existingSubs.includes(formData.subcategory)) {
+                  allSubs.unshift(formData.subcategory);
+                }
+                
+                return allSubs.map((subcat) => (
                   <option key={subcat} value={subcat}>
                     {subcat}
                   </option>
-                ))}
+                ));
+              })()}
             </select>
           </div>
-        )}
+        ) : null}
 
         {/* URL - LINK */}
         <div>
           <label className="block text-white font-medium mb-2">
             LINK *
           </label>
-          <input
-            type="url"
-            name="url"
-            value={formData.url}
-            onChange={handleChange}
-            required
-            className="input"
-            placeholder="https://example.com"
-          />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="url"
+                name="url"
+                value={formData.url}
+                onChange={handleChange}
+                required
+                className="input w-full"
+                placeholder="https://example.com"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAutoFetch}
+              disabled={isFetchingMeta || !formData.url}
+              className="btn btn-secondary whitespace-nowrap flex items-center gap-2 px-4"
+              title="Dùng AI quét trang web để tự động điền thông tin"
+            >
+              {isFetchingMeta ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Đang quét...</span>
+                </>
+              ) : (
+                <span>✨ AI Quét</span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Technologies - CÔNG NGHỆ LIÊN QUAN */}

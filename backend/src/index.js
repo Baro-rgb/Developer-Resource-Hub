@@ -12,6 +12,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const shareRoutes = require('./routes/shareRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const automationRoutes = require('./routes/automationRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 /**
@@ -136,6 +137,9 @@ app.use('/api/shares', shareRoutes);
 
 // Notification API routes
 app.use('/api/notifications', notificationRoutes);
+
+// Automation API routes
+app.use('/api/automation', automationRoutes);
 
 // ==========================================
 // 4. 404 HANDLER

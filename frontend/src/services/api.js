@@ -269,6 +269,16 @@ export const importShareLink = async (token) => {
   }
 };
 
+// Automation endpoints
+export const fetchMetadata = async (url) => {
+  try {
+    const response = await apiClient.post('/automation/fetch-meta', { url });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
 // Notification endpoints
 export const sendNotification = async (recipient_email, resource_id) => {
   try {

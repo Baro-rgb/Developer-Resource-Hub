@@ -15,6 +15,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const saveSession = (token, userData) => {
     localStorage.setItem('auth_token', token);
@@ -70,7 +71,7 @@ export const AuthProvider = ({ children }) => {
       if (lastActivity && Date.now() - parseInt(lastActivity, 10) > INACTIVITY_LIMIT_MS) {
         if (localStorage.getItem('auth_token')) {
           logout();
-          alert('Phiên đăng nhập đã hết hạn do không hoạt động (30 phút). Vui lòng đăng nhập lại.');
+          setSessionExpired(true);
         }
       }
     };
@@ -113,6 +114,25 @@ export const AuthProvider = ({ children }) => {
       }}
     >
       {children}
+      {sessionExpired && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-800">
+              <span className="text-2xl">⏳</span>
+            </div>
+            <h3 className="mb-2 text-xl font-bold text-white">Đã hết phiên làm việc</h3>
+            <p className="mb-6 text-sm text-slate-400">
+              Vì lý do bảo mật, tài khoản của bạn đã được tự động đăng xuất do không có hoạt động nào trong 30 phút.
+            </p>
+            <button 
+              onClick={() => { setSessionExpired(false); window.location.href = '/login'; }}
+              className="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-blue-500"
+            >
+              Đăng nhập lại
+            </button>
+          </div>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };
