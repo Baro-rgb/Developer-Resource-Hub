@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Layers, PlusCircle, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Layers, PlusCircle, Lightbulb } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useResources } from '../context/ResourceContext';
 import { getResources, deleteResource, getCategories } from '../services/api';
