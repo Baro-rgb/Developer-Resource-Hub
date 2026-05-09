@@ -1,17 +1,47 @@
 # 🚀 Developer Resource Hub - Fullstack Application
 
+> **Important (updated 2026):** hệ thống hiện chạy trên **PostgreSQL (Supabase)** + JWT auth + role admin.
+> Một số phần phía dưới trong file này là tài liệu lịch sử (MongoDB) và không còn phản ánh hoàn toàn implementation hiện tại.
+
 ## 📖 Mô tả Dự Án
 
-Ứng dụng web fullstack để quản lý tài nguyên lập trình (Developer Resource Hub). Thay thế Google Sheets bằng một hệ thống web chuyên nghiệp.
+Ứng dụng web fullstack để quản lý tài nguyên lập trình (Developer Resource Hub): lưu link, phân loại category/subcategory, tìm kiếm, bulk import/edit/delete, chia sẻ tài nguyên, quản trị user và quota theo gói.
 
-### Tính năng chính:
-- ✅ Quản lý tài nguyên (CRUD)
-- ✅ Tìm kiếm & lọc (search, category, tags, subcategory)
-- ✅ Đánh dấu yêu thích (Favorite/Bookmark)
-- ✅ Phân trang (Pagination)
-- ✅ Giao diện Dashboard (Dark mode)
-- ✅ API REST đầy đủ
-- ✅ Database MongoDB
+### Tính năng chính hiện tại
+- ✅ Đăng ký/đăng nhập JWT + auto session timeout
+- ✅ Dashboard quản lý resource theo category-first flow
+- ✅ Bulk import / bulk edit / bulk delete
+- ✅ Admin panel quản lý user/resource/category
+- ✅ Share link + notification import
+- ✅ Quota gói free/pro + upgrade code
+- ✅ API hardening cơ bản (helmet, rate limit, Joi validation)
+
+## ⚡ Quick Start (Current)
+
+Chi tiết kiến trúc và modules hiện tại: xem `CURRENT_STATE.md`.
+
+### Backend
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm start
+```
+
+### Environment (backend/.env)
+```env
+DATABASE_URL=postgresql://...
+JWT_SECRET=your_long_secret
+PORT=4000
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
+```
 
 ---
 

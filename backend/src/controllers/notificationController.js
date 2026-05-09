@@ -1,5 +1,6 @@
 // src/controllers/notificationController.js
 const { pool } = require('../config/database');
+const { ensureResourceQuota } = require('../middleware/quotaMiddleware');
 
 const sendNotification = async (req, res, next) => {
   try {
@@ -93,6 +94,7 @@ const respondToNotification = async (req, res, next) => {
     }
 
     if (action === 'accept') {
+      await ensureResourceQuota(req.user, 1);
       const resource_id = notifResult.rows[0].resource_id;
 
       // Get resource details

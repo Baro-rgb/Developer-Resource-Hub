@@ -4,17 +4,17 @@ const router = express.Router();
 const { getUsers, updateUser, deleteUser, getAllResources, getResourceById, updateResource, deleteResource } = require('../controllers/adminController');
 const authenticate = require('../middleware/authMiddleware');
 const authorizeAdmin = require('../middleware/adminMiddleware');
-const { validateRequest, userUpdateSchema } = require('../middleware/validation');
+const { validateRequest, validateParams, userUpdateSchema, adminResourceUpdateSchema, idParamSchema } = require('../middleware/validation');
 
 router.use(authenticate, authorizeAdmin);
 
 router.get('/users', getUsers);
-router.put('/users/:id', validateRequest(userUpdateSchema), updateUser);
-router.delete('/users/:id', deleteUser);
+router.put('/users/:id', validateParams(idParamSchema), validateRequest(userUpdateSchema), updateUser);
+router.delete('/users/:id', validateParams(idParamSchema), deleteUser);
 
 router.get('/resources', getAllResources);
-router.get('/resources/:id', getResourceById);
-router.put('/resources/:id', updateResource);
-router.delete('/resources/:id', deleteResource);
+router.get('/resources/:id', validateParams(idParamSchema), getResourceById);
+router.put('/resources/:id', validateParams(idParamSchema), validateRequest(adminResourceUpdateSchema), updateResource);
+router.delete('/resources/:id', validateParams(idParamSchema), deleteResource);
 
 module.exports = router;

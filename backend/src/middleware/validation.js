@@ -87,6 +87,55 @@ const bulkUpdateSchema = Joi.object({
   mode: Joi.string().valid('replace', 'fill').optional(),
 });
 
+const idParamSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+});
+
+const tokenParamSchema = Joi.object({
+  token: Joi.string().alphanum().min(8).max(128).required(),
+});
+
+const shareGenerateSchema = Joi.object({
+  resource_id: Joi.number().integer().positive().required(),
+});
+
+const notificationSendSchema = Joi.object({
+  recipient_email: Joi.string().email({ tlds: { allow: false } }).required(),
+  resource_id: Joi.number().integer().positive().required(),
+});
+
+const notificationRespondSchema = Joi.object({
+  action: Joi.string().valid('accept', 'reject').required(),
+});
+
+const upgradeApplySchema = Joi.object({
+  code: Joi.string().trim().min(4).max(100).required(),
+});
+
+const upgradeGenerateSchema = Joi.object({
+  planType: Joi.string().valid('pro').optional(),
+  count: Joi.number().integer().min(1).max(200).optional(),
+});
+
+const automationFetchMetaSchema = Joi.object({
+  url: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
+});
+
+const adminResourceUpdateSchema = Joi.object({
+  title: Joi.string().min(3).max(255).optional(),
+  category: Joi.string().max(100).optional().allow(null, ''),
+  subcategory: Joi.string().max(100).optional().allow(null, ''),
+  url: Joi.string().uri().optional(),
+  technologies: Joi.array().items(Joi.string()).optional(),
+  description: Joi.string().max(1000).optional().allow(null, ''),
+  notes: Joi.string().max(1000).optional().allow(null, ''),
+  source: Joi.string()
+    .valid('Tiktok', 'YouTube', 'Facebook', 'Twitter', 'Blog', 'GitHub', 'Khác')
+    .optional()
+    .allow(null, ''),
+  lastUsedDate: Joi.date().optional().allow(null, ''),
+});
+
 /**
  * Validate request body
  * @param {Object} schema - Joi schema để validate
@@ -109,8 +158,27 @@ const validateRequest = (schema) => {
   };
 };
 
+const validateParams = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.params, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+
+    if (error) {
+      const err = new Error('Validation Error');
+      err.details = error.details;
+      return next(err);
+    }
+
+    req.params = value;
+    next();
+  };
+};
+
 module.exports = {
   validateRequest,
+  validateParams,
   resourceSchema,
   registerSchema,
   loginSchema,
@@ -120,4 +188,13 @@ module.exports = {
   bulkCreateSchema,
   bulkDeleteSchema,
   bulkUpdateSchema,
+  idParamSchema,
+  tokenParamSchema,
+  shareGenerateSchema,
+  notificationSendSchema,
+  notificationRespondSchema,
+  upgradeApplySchema,
+  upgradeGenerateSchema,
+  automationFetchMetaSchema,
+  adminResourceUpdateSchema,
 };

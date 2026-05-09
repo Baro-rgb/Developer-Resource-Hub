@@ -1,5 +1,12 @@
 # 🏗️ ARCHITECTURE.md - System Design & Architecture
 
+> **Important (2026):** Kiến trúc vận hành hiện tại:
+> - Backend: Express + PostgreSQL (`pg`) + JWT + Joi + helmet + rate limit
+> - Frontend: React + Router + Context + Axios
+> - Modules chính: auth, resources (CRUD + bulk), categories, admin, share, notifications, automation, upgrade
+>
+> Sơ đồ MongoDB/Mongoose trong phần dưới là tài liệu cũ chưa đồng bộ hoàn toàn.
+
 ## High-Level Overview
 
 ```

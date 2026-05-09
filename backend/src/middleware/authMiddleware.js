@@ -10,6 +10,7 @@ const authenticate = (req, res, next) => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     const err = new Error('Unauthorized');
     err.statusCode = 401;
+    err.code = 'AUTH_REQUIRED';
     return next(err);
   }
 
@@ -25,6 +26,7 @@ const authenticate = (req, res, next) => {
   } catch (error) {
     const err = new Error('Invalid token');
     err.statusCode = 401;
+    err.code = 'AUTH_INVALID_TOKEN';
     return next(err);
   }
 };

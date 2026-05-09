@@ -1,6 +1,7 @@
 // src/controllers/shareController.js
 const crypto = require('crypto');
 const { pool } = require('../config/database');
+const { ensureResourceQuota } = require('../middleware/quotaMiddleware');
 
 const generateLink = async (req, res, next) => {
   try {
@@ -74,6 +75,7 @@ const importLink = async (req, res, next) => {
   try {
     const { token } = req.params;
     const user_id = req.user.id;
+    await ensureResourceQuota(req.user, 1);
 
     // Get link info
     const linkResult = await pool.query(

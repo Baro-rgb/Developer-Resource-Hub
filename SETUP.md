@@ -1,5 +1,8 @@
 # 📖 Setup Guide - Developer Resource Hub
 
+> **Important (2026):** Bản hiện tại dùng **PostgreSQL/Supabase + JWT**.  
+> Các đoạn hướng dẫn MongoDB phía dưới là tài liệu cũ, chỉ giữ lại để tham chiếu lịch sử.
+
 ## Hướng dẫn Chi Tiết Từ Đầu (Step by Step)
 
 ---
@@ -16,23 +19,18 @@ node --version   # v16+ hoặc v18+
 npm --version    # 8+ hoặc 9+
 ```
 
-### 2. MongoDB
+### 2. PostgreSQL / Supabase (Current)
 Chọn một trong hai:
 
-**Option A: Local MongoDB**
+**Option A: Supabase**
 ```bash
-# Windows: Download từ https://www.mongodb.com/try/download/community
-# Cài đặt và start service
-
-# Kiểm tra
-mongod --version
+# Tạo project Supabase và lấy DATABASE_URL
 ```
 
-**Option B: MongoDB Atlas (Cloud - Recommended)**
-1. Truy cập https://www.mongodb.com/cloud/atlas
-2. Đăng ký tài khoản (miễn phí)
-3. Tạo cluster
-4. Lấy connection string
+**Option B: Local PostgreSQL**
+1. Cài PostgreSQL local
+2. Tạo database
+3. Dùng `DATABASE_URL` trong `.env`
 
 ### 3. Git (tùy chọn)
 ```bash
@@ -41,7 +39,7 @@ git --version
 
 ---
 
-## 🔧 Backend Setup (Node.js + Express + MongoDB)
+## 🔧 Backend Setup (Node.js + Express + PostgreSQL)
 
 ### Step 1: Vào folder backend
 

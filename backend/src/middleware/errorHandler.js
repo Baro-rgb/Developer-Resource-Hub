@@ -10,6 +10,7 @@ const errorHandler = (err, req, res, next) => {
   // Mặc định error status là 500
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
+  const code = err.code;
 
   // Xử lý Mongoose validation error
   if (err.name === 'ValidationError') {
@@ -20,6 +21,7 @@ const errorHandler = (err, req, res, next) => {
       success: false,
       message,
       errors,
+      code: 'VALIDATION_ERROR',
     });
   }
 
@@ -31,6 +33,7 @@ const errorHandler = (err, req, res, next) => {
       success: false,
       message,
       field: Object.keys(err.keyPattern)[0],
+      code: 'DUPLICATE_FIELD',
     });
   }
 
@@ -45,6 +48,7 @@ const errorHandler = (err, req, res, next) => {
       success: false,
       message: 'Validation Error',
       errors,
+      code: 'VALIDATION_ERROR',
     });
   }
 
@@ -62,6 +66,7 @@ const errorHandler = (err, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     message,
+    code,
   });
 };
 

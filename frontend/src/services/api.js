@@ -332,11 +332,15 @@ export const respondToNotification = async (id, action) => {
  */
 const handleError = (error) => {
   if (error.response) {
+    const responseData = error.response.data || {};
     // Server responded with error
     return {
-      message: error.response.data?.message || 'An error occurred',
+      message: responseData.message || 'An error occurred',
       status: error.response.status,
-      data: error.response.data,
+      code: responseData.code,
+      errors: responseData.errors,
+      data: responseData,
+      isAuthError: error.response.status === 401,
     };
   } else if (error.request) {
     // Request made but no response
