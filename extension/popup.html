@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <title>Save to Hub</title>
   <link rel="stylesheet" href="popup.css">
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -13,9 +15,20 @@
     </header>
 
     <div id="authSection" class="section">
-      <p class="desc">Vui lòng nhập Token từ trang Web của bạn để cấp quyền.</p>
-      <input type="text" id="tokenInput" placeholder="Dán JWT Token vào đây..." />
-      <button id="saveTokenBtn" class="btn primary">Lưu Token</button>
+      <p class="desc">Chưa đăng nhập! Nhấn đồng bộ để lấy Token tự động từ trang Web của bạn.</p>
+      
+      <button id="autoSyncBtn" class="btn primary mb-2" style="background-color: #10b981; margin-bottom: 8px;">
+        🔄 Tự động Đồng bộ (Khuyên dùng)
+      </button>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <hr style="flex: 1; border: none; border-top: 1px solid #334155;">
+        <span style="font-size: 10px; color: #64748b;">HOẶC</span>
+        <hr style="flex: 1; border: none; border-top: 1px solid #334155;">
+      </div>
+
+      <input type="text" id="tokenInput" placeholder="Dán JWT Token thủ công..." />
+      <button id="saveTokenBtn" class="btn secondary">Lưu Token</button>
       <p id="authMsg" class="msg"></p>
     </div>
 
@@ -28,7 +41,7 @@
       <div class="btn-group">
         <button id="fetchBtn" class="btn primary">Quét & Lưu (AI)</button>
       </div>
-      
+
       <div id="statusBox" class="status-box hidden">
         <div class="loader" id="loader"></div>
         <p id="statusMsg">Đang phân tích...</p>
@@ -36,8 +49,20 @@
 
       <button id="logoutBtn" class="btn secondary mt-4">Xóa Token (Đăng xuất)</button>
     </div>
+
+    <footer>
+      <div class="footer-info">
+        <strong>Developer Resource Hub</strong>
+        <span>v1.0.0 &copy; 2026</span>
+      </div>
+      <div class="footer-contact">
+        <span>By: Nguyen Chi Bao</span> |
+        <a href="mailto:chibao220304@gmail.com">chibao220304@gmail.com</a>
+      </div>
+    </footer>
   </div>
 
   <script src="popup.js"></script>
 </body>
+
 </html>

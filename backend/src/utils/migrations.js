@@ -311,6 +311,90 @@ const migrations = [
       }
     },
   },
+  {
+    id: '006_subscription_and_quotas',
+    description: 'Add subscription plan to users and create upgrade_codes table',
+    up: async () => {
+      const client = await pool.connect();
+      try {
+        // Update users table
+        await client.query(`
+          ALTER TABLE users 
+          ADD COLUMN IF NOT EXISTS subscription_plan VARCHAR(20) DEFAULT 'free',
+          ADD COLUMN IF NOT EXISTS resource_count INTEGER DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS category_count INTEGER DEFAULT 0
+        `);
+
+        // Recalculate current counts for existing users
+        await client.query(`
+          UPDATE users u
+          SET 
+            resource_count = (SELECT COUNT(*) FROM resources r WHERE r.owner_id = u.id),
+            category_count = (SELECT COUNT(*) FROM categories c WHERE c.owner_id = u.id)
+        `);
+
+        // Create upgrade codes table
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS upgrade_codes (
+            id SERIAL PRIMARY KEY,
+            code VARCHAR(50) UNIQUE NOT NULL,
+            plan_type VARCHAR(20) NOT NULL DEFAULT 'pro',
+            is_used BOOLEAN DEFAULT false,
+            used_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            used_at TIMESTAMP WITH TIME ZONE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          )
+        `);
+
+        console.log('✅ Migration 006 completed: Added subscription plan and upgrade_codes');
+        return true;
+      } catch (error) {
+        console.error('❌ Migration 006 failed:', error.message);
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  },
+  {
+    id: '007_performance_indexes',
+    description: 'Add indexes to improve query performance for large datasets',
+    up: async () => {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        
+        // 1. Index on resources table
+        await client.query(`
+          CREATE INDEX IF NOT EXISTS idx_resources_owner_id ON resources(owner_id);
+          CREATE INDEX IF NOT EXISTS idx_resources_category ON resources(category);
+          CREATE INDEX IF NOT EXISTS idx_resources_subcategory ON resources(subcategory);
+          CREATE INDEX IF NOT EXISTS idx_resources_source ON resources(source);
+          -- GIN index for full-text search on title and description could be added here in the future
+        `);
+
+        // 2. Index on categories table
+        await client.query(`
+          CREATE INDEX IF NOT EXISTS idx_categories_owner_id ON categories(owner_id);
+        `);
+
+        // 3. Index on shared_links table
+        await client.query(`
+          CREATE INDEX IF NOT EXISTS idx_shared_links_created_by ON shared_links(created_by);
+        `);
+
+        await client.query('COMMIT');
+        console.log('✅ Migration 007 completed: Added performance indexes');
+        return true;
+      } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('❌ Migration 007 failed:', error.message);
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  },
 ];
 
 /**

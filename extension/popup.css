@@ -151,3 +151,45 @@ input[type="text"]:focus {
 }
 .msg.error { color: #f87171; } /* red-400 */
 .msg.success { color: #34d399; } /* emerald-400 */
+
+/* Footer Info */
+footer {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px dashed #1e293b;
+  text-align: center;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.footer-info strong {
+  font-size: 12px;
+  color: #e2e8f0; /* slate-200 */
+  letter-spacing: 0.3px;
+}
+
+.footer-info span {
+  font-size: 10px;
+  color: #64748b; /* slate-500 */
+}
+
+.footer-contact {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.footer-contact a {
+  color: #38bdf8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-contact a:hover {
+  color: #7dd3fc; /* sky-300 */
+  text-decoration: underline;
+}

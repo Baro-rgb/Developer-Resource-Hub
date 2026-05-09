@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const saveSection = document.getElementById('saveSection');
   const tokenInput = document.getElementById('tokenInput');
   const saveTokenBtn = document.getElementById('saveTokenBtn');
+  const autoSyncBtn = document.getElementById('autoSyncBtn');
   const authMsg = document.getElementById('authMsg');
   
   const urlInput = document.getElementById('urlInput');
@@ -23,7 +24,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Handle Token Save
+  // Handle Auto Sync Token
+  autoSyncBtn.addEventListener('click', async () => {
+    try {
+      // Tìm tab localhost:3000 đang mở
+      chrome.tabs.query({ url: "http://localhost:3000/*" }, (tabs) => {
+        if (tabs.length === 0) {
+          authMsg.textContent = 'Vui lòng mở trang Hub (localhost:3000) và đăng nhập trước!';
+          authMsg.className = 'msg error';
+          return;
+        }
+
+        const hubTab = tabs[0];
+        
+        // Chạy script lấy localStorage từ tab đó
+        chrome.scripting.executeScript({
+          target: { tabId: hubTab.id },
+          func: () => localStorage.getItem('auth_token')
+        }, (results) => {
+          if (chrome.runtime.lastError) {
+            authMsg.textContent = 'Lỗi truy cập Web: ' + chrome.runtime.lastError.message;
+            authMsg.className = 'msg error';
+            return;
+          }
+
+          const token = results[0].result;
+          if (token) {
+            chrome.storage.local.set({ authToken: token }, () => {
+              authMsg.textContent = '✅ Đã đồng bộ thành công!';
+              authMsg.className = 'msg success';
+              setTimeout(showSaveSection, 1000);
+            });
+          } else {
+            authMsg.textContent = 'Không tìm thấy Token. Bạn đã đăng nhập trên Web chưa?';
+            authMsg.className = 'msg error';
+          }
+        });
+      });
+    } catch (err) {
+      authMsg.textContent = 'Lỗi đồng bộ: ' + err.message;
+      authMsg.className = 'msg error';
+    }
+  });
+
+  // Handle Token Save (Manual)
   saveTokenBtn.addEventListener('click', () => {
     const token = tokenInput.value.trim();
     if (!token) return;

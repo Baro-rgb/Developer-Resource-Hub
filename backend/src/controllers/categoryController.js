@@ -85,8 +85,15 @@ const updateCategory = async (req, res, next) => {
       return next(err);
     }
 
-    const query = `UPDATE categories SET ${updates.join(', ')} WHERE id = $${index} RETURNING id, name, key, subcategories`;
-    params.push(id);
+    let query = '';
+    
+    if (req.user.isAdmin) {
+      query = `UPDATE categories SET ${updates.join(', ')} WHERE id = $${index} RETURNING id, name, key, subcategories`;
+      params.push(id);
+    } else {
+      query = `UPDATE categories SET ${updates.join(', ')} WHERE id = $${index} AND owner_id = $${index + 1} RETURNING id, name, key, subcategories`;
+      params.push(id, req.user.id);
+    }
 
     const result = await pool.query(query, params);
     if (result.rows.length === 0) {
@@ -104,7 +111,12 @@ const updateCategory = async (req, res, next) => {
 const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM categories WHERE id = $1 RETURNING id, name, key', [id]);
+    let result;
+    if (req.user.isAdmin) {
+      result = await pool.query('DELETE FROM categories WHERE id = $1 RETURNING id, name, key', [id]);
+    } else {
+      result = await pool.query('DELETE FROM categories WHERE id = $1 AND owner_id = $2 RETURNING id, name, key', [id, req.user.id]);
+    }
 
     if (result.rows.length === 0) {
       const err = new Error('Category not found');

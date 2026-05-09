@@ -12,7 +12,7 @@ import { createResource, updateResource, getCategories, fetchMetadata } from '..
  * - onSuccess: Callback khi submit thành công
  * - onCancel: Callback khi user cancel
  */
-const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
+const ResourceForm = ({ initialData = null, onSuccess, onCancel, onQuotaExceeded }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: '',
@@ -268,7 +268,11 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel }) => {
       }
       onSuccess();
     } catch (err) {
-      setError(err.message || t('messages.failed_to_create'));
+      if (err.code === 'QUOTA_EXCEEDED' && onQuotaExceeded) {
+        onQuotaExceeded(err.message);
+      } else {
+        setError(err.message || t('messages.failed_to_create'));
+      }
     } finally {
       setLoading(false);
     }

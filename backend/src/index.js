@@ -13,6 +13,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const shareRoutes = require('./routes/shareRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const automationRoutes = require('./routes/automationRoutes');
+const upgradeRoutes = require('./routes/upgradeRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 /**
@@ -108,6 +109,17 @@ const globalApiLimiter = rateLimit({
   },
 });
 
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  limit: 20, // Limit each IP to 20 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many login/register attempts. Please try again after 10 minutes.',
+  },
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -124,7 +136,7 @@ app.use('/api', globalApiLimiter);
 app.use('/api/resources', resourceRoutes);
 
 // Auth API routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 
 // Category API routes
 app.use('/api/categories', categoryRoutes);
@@ -140,6 +152,9 @@ app.use('/api/notifications', notificationRoutes);
 
 // Automation API routes
 app.use('/api/automation', automationRoutes);
+
+// Upgrade API routes
+app.use('/api/upgrade', upgradeRoutes);
 
 // ==========================================
 // 4. 404 HANDLER

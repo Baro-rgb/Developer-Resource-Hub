@@ -5,13 +5,20 @@
   "description": "Save developer resources with 1 click directly to your Hub.",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Save to Hub"
   },
   "host_permissions": [
-    "http://localhost:4000/*"
-  ]
+    "http://localhost:4000/*",
+    "http://localhost:3000/*"
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
 }

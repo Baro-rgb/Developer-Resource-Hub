@@ -14,7 +14,9 @@ import BulkToolModal from '../components/BulkToolModal';
 import ShareModal from '../components/ShareModal';
 import ImportShareModal from '../components/ImportShareModal';
 import NotificationBell from '../components/NotificationBell';
-import { Download } from 'lucide-react';
+import { Download, Settings, Crown } from 'lucide-react';
+import CategoryManagerModal from '../components/CategoryManagerModal';
+import UpgradeModal from '../components/UpgradeModal';
 
 /**
  * Dashboard Page
@@ -38,6 +40,9 @@ const Dashboard = () => {
   const [categories, setCategories] = useState([]);
   const [shareResource, setShareResource] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
   const shouldShowCategoryGuide =
     !filters.category && !filters.subcategory && !filters.search && !filters.source;
@@ -68,7 +73,13 @@ const Dashboard = () => {
       Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
 
       const data = await getResources(params);
-      setResources(data.data);
+      
+      if (params.page === 1) {
+        setResources(data.data);
+      } else {
+        setResources(prev => [...prev, ...data.data]);
+      }
+      
       setPagination(data.pagination);
     } catch (err) {
       setError(err.message || t('messages.failed_to_fetch'));
@@ -84,6 +95,11 @@ const Dashboard = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [showForm]);
+
+  // Scroll to top khi thay đổi danh mục
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [filters.category, filters.subcategory]);
 
   // Fetch resources khi filters, pagination thay đổi
   useEffect(() => {
@@ -157,6 +173,11 @@ const Dashboard = () => {
           initialData={editingResource}
           onSuccess={handleFormSuccess}
           onCancel={handleFormCancel}
+          onQuotaExceeded={(msg) => {
+            setShowForm(false);
+            setUpgradeMessage(msg);
+            setShowUpgradeModal(true);
+          }}
         />
       </div>
     );
@@ -178,6 +199,13 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowCategoryManager(true)}
+                className="flex items-center gap-2 rounded-xl bg-slate-800 border border-slate-700 px-6 py-2.5 font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              >
+                <Settings className="h-5 w-5" />
+                Danh mục
+              </button>
               <button
                 onClick={() => setShowBulkTool(true)}
                 className={`flex items-center gap-2 rounded-xl px-6 py-2.5 font-semibold transition-colors ${
@@ -213,6 +241,21 @@ const Dashboard = () => {
                 <Link to="/admin" className="rounded-lg bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-400 hover:bg-blue-500/20">
                   Admin
                 </Link>
+              )}
+              {user?.subscription_plan === 'pro' ? (
+                <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-400">
+                  <Crown className="h-3 w-3" /> PRO
+                </span>
+              ) : (
+                <button
+                  onClick={() => {
+                    setUpgradeMessage('Nâng cấp lên gói Pro để mở khóa không giới hạn tài nguyên và danh mục!');
+                    setShowUpgradeModal(true);
+                  }}
+                  className="flex items-center gap-1 rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-bold text-slate-400 hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30 transition-all"
+                >
+                  <Crown className="h-3 w-3" /> Nâng cấp
+                </button>
               )}
             </div>
             {isAuthenticated ? (
@@ -311,29 +354,16 @@ const Dashboard = () => {
                     ))}
                   </div>
 
-                  {pagination.pages > 1 && (
-                    <footer className="flex items-center justify-between border-t border-slate-700/40 pt-8">
-                      <p className="text-sm font-medium text-slate-400">
-                        {t('pagination.page')} <span className="font-bold text-white">{pagination.page}</span> {t('pagination.of')} <span className="font-bold text-white">{pagination.pages}</span>
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          disabled={pagination.page === 1}
-                          onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
-                          className="rounded-lg border border-slate-700/40 p-2 text-slate-300 transition-all hover:bg-slate-800 disabled:opacity-30"
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </button>
-                        <button className="h-10 w-10 rounded-lg bg-blue-500 font-bold text-slate-950">{pagination.page}</button>
-                        <button
-                          disabled={pagination.page === pagination.pages}
-                          onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
-                          className="rounded-lg border border-slate-700/40 p-2 text-slate-300 transition-all hover:bg-slate-800 disabled:opacity-30"
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </footer>
+                  {pagination.page < pagination.pages && (
+                    <div className="mt-8 flex justify-center pb-8 border-b border-slate-700/40">
+                      <button
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                        disabled={loading}
+                        className="group flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-8 py-3 text-sm font-bold text-blue-400 transition-all hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:hover:bg-blue-500/10 disabled:hover:text-blue-400"
+                      >
+                        {loading ? 'Đang tải...' : 'Tải thêm tài nguyên'}
+                      </button>
+                    </div>
                   )}
                 </>
               )}
@@ -387,6 +417,29 @@ const Dashboard = () => {
             fetchResources();
             setTimeout(() => setToastMessage(null), 3000);
           }}
+        />
+      )}
+
+      {showCategoryManager && (
+        <CategoryManagerModal
+          isOpen={showCategoryManager}
+          onClose={() => setShowCategoryManager(false)}
+          onQuotaExceeded={(msg) => {
+            setShowCategoryManager(false);
+            setUpgradeMessage(msg);
+            setShowUpgradeModal(true);
+          }}
+          onCategoryUpdate={() => {
+            window.location.reload();
+          }}
+        />
+      )}
+
+      {showUpgradeModal && (
+        <UpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          message={upgradeMessage}
         />
       )}
 

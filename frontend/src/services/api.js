@@ -28,6 +28,34 @@ apiClient.interceptors.request.use((config) => {
 
 /**
  * ==========================================
+ * AUTOMATION API (AI)
+ * ==========================================
+ */
+export const fetchMetadata = async (url) => {
+  try {
+    const response = await apiClient.post('/automation/fetch-meta', { url });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+/**
+ * ==========================================
+ * UPGRADE API
+ * ==========================================
+ */
+export const applyUpgradeCode = async (code) => {
+  try {
+    const response = await apiClient.post('/upgrade/apply', { code });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+/**
+ * ==========================================
  * RESOURCE ENDPOINTS
  * ==========================================
  */
@@ -269,15 +297,6 @@ export const importShareLink = async (token) => {
   }
 };
 
-// Automation endpoints
-export const fetchMetadata = async (url) => {
-  try {
-    const response = await apiClient.post('/automation/fetch-meta', { url });
-    return response.data;
-  } catch (error) {
-    throw handleError(error);
-  }
-};
 
 // Notification endpoints
 export const sendNotification = async (recipient_email, resource_id) => {

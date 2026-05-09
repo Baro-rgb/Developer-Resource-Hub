@@ -20,6 +20,7 @@ const {
   bulkDeleteSchema,
 } = require('../middleware/validation');
 const authenticate = require('../middleware/authMiddleware');
+const { checkResourceQuota } = require('../middleware/quotaMiddleware');
 
 /**
  * Resource Routes
@@ -41,7 +42,7 @@ router.get('/:id', getResourceById);
 router.post('/bulk', validateRequest(bulkCreateSchema), bulkCreateResources);
 router.patch('/bulk', validateRequest(bulkUpdateSchema), bulkUpdateResources);
 router.delete('/bulk', validateRequest(bulkDeleteSchema), bulkDeleteResources);
-router.post('/', validateRequest(resourceSchema), createResource);
+router.post('/', checkResourceQuota, validateRequest(resourceSchema), createResource);
 router.put('/:id', validateRequest(resourceSchema), updateResource);
 router.delete('/:id', deleteResource);
 

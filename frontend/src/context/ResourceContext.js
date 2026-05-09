@@ -45,12 +45,13 @@ export const ResourceProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Update filters
+  // Update filters and reset page to 1
   const updateFilters = useCallback((newFilters) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters,
     }));
+    setPagination(prev => ({ ...prev, page: 1 }));
   }, []);
 
   // Reset filters
@@ -61,6 +62,7 @@ export const ResourceProvider = ({ children }) => {
       subcategory: '',
       source: '',
     });
+    setPagination(prev => ({ ...prev, page: 1 }));
   }, []);
 
   const value = useMemo(() => ({

@@ -31,7 +31,7 @@ const register = async (req, res, next) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      `INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, is_admin, created_at`,
+      `INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, is_admin, subscription_plan, resource_count, category_count, created_at`,
       [name || 'User', email, passwordHash]
     );
 
@@ -78,6 +78,9 @@ const login = async (req, res, next) => {
           name: user.name,
           email: user.email,
           is_admin: user.is_admin,
+          subscription_plan: user.subscription_plan,
+          resource_count: user.resource_count,
+          category_count: user.category_count,
           created_at: user.created_at,
         },
         token,
@@ -96,7 +99,7 @@ const profile = async (req, res, next) => {
       return next(err);
     }
 
-    const result = await pool.query('SELECT id, name, email, is_admin, created_at FROM users WHERE id = $1', [req.user.id]);
+    const result = await pool.query('SELECT id, name, email, is_admin, subscription_plan, resource_count, category_count, created_at FROM users WHERE id = $1', [req.user.id]);
     if (result.rows.length === 0) {
       const err = new Error('User not found');
       err.statusCode = 404;
