@@ -246,6 +246,12 @@ const ResourceForm = ({ initialData = null, onSuccess, onCancel, onQuotaExceeded
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (!formData.category || !formData.category.trim()) {
+      setError('Vui lòng chọn hoặc nhập danh mục cho tài nguyên.');
+      return;
+    }
+
     setLoading(true);
 
     const payload = {

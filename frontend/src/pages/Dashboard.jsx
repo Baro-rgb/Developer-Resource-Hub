@@ -1,6 +1,6 @@
 // src/pages/Dashboard.jsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layers, PlusCircle, Lightbulb } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -16,7 +16,7 @@ import ImportShareModal from '../components/ImportShareModal';
 import NotificationBell from '../components/NotificationBell';
 import { Download, Settings, Crown } from 'lucide-react';
 import CategoryManagerModal from '../components/CategoryManagerModal';
-import UpgradeModal from '../components/UpgradeModal';
+
 
 /**
  * Dashboard Page
@@ -32,6 +32,7 @@ import UpgradeModal from '../components/UpgradeModal';
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
   const { resources, setResources, pagination, setPagination, filters, updateFilters, loading, setLoading, error, setError } = useResources();
   const [showForm, setShowForm] = useState(false);
   const [showBulkTool, setShowBulkTool] = useState(false);
@@ -41,7 +42,7 @@ const Dashboard = () => {
   const [shareResource, setShareResource] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   const [upgradeMessage, setUpgradeMessage] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
   const shouldShowCategoryGuide =
@@ -176,7 +177,7 @@ const Dashboard = () => {
           onQuotaExceeded={(msg) => {
             setShowForm(false);
             setUpgradeMessage(msg);
-            setShowUpgradeModal(true);
+            navigate('/pricing');
           }}
         />
       </div>
@@ -250,7 +251,7 @@ const Dashboard = () => {
                 <button
                   onClick={() => {
                     setUpgradeMessage('Nâng cấp lên gói Pro để mở khóa không giới hạn tài nguyên và danh mục!');
-                    setShowUpgradeModal(true);
+                    navigate('/pricing');
                   }}
                   className="flex items-center gap-1 rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-bold text-slate-400 hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30 transition-all"
                 >
@@ -427,7 +428,7 @@ const Dashboard = () => {
           onQuotaExceeded={(msg) => {
             setShowCategoryManager(false);
             setUpgradeMessage(msg);
-            setShowUpgradeModal(true);
+            navigate('/pricing');
           }}
           onCategoryUpdate={() => {
             window.location.reload();
@@ -435,13 +436,6 @@ const Dashboard = () => {
         />
       )}
 
-      {showUpgradeModal && (
-        <UpgradeModal
-          isOpen={showUpgradeModal}
-          onClose={() => setShowUpgradeModal(false)}
-          message={upgradeMessage}
-        />
-      )}
 
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-[100] bg-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl border border-emerald-400/50 font-medium flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">

@@ -288,9 +288,9 @@ export const previewShareLink = async (token) => {
   }
 };
 
-export const importShareLink = async (token) => {
+export const importShareLink = async (token, targetCategory = null) => {
   try {
-    const response = await apiClient.post(`/shares/import/${token}`);
+    const response = await apiClient.post(`/shares/import/${token}`, { category: targetCategory });
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -320,6 +320,28 @@ export const getNotifications = async () => {
 export const respondToNotification = async (id, action) => {
   try {
     const response = await apiClient.post(`/notifications/${id}/respond`, { action });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+// ==========================================
+// 8. PAYMENT API
+// ==========================================
+
+export const createPaymentLink = async (plan) => {
+  try {
+    const response = await apiClient.post('/payment/create-payment-link', { plan });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const checkPaymentStatus = async (orderCode) => {
+  try {
+    const response = await apiClient.get(`/payment/status/${orderCode}`);
     return response.data;
   } catch (error) {
     throw handleError(error);

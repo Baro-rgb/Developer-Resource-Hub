@@ -395,6 +395,39 @@ const migrations = [
       }
     },
   },
+  {
+    id: '008_create_payments_table',
+    description: 'Create table for tracking PayOS payment transactions',
+    up: async () => {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS payments (
+            id SERIAL PRIMARY KEY,
+            order_code BIGINT UNIQUE NOT NULL,
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            amount INTEGER NOT NULL,
+            status VARCHAR(50) DEFAULT 'PENDING',
+            plan_type VARCHAR(50) NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `);
+
+        await client.query('COMMIT');
+        console.log('✅ Migration 008 completed: Created payments table');
+        return true;
+      } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('❌ Migration 008 failed:', error.message);
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  },
 ];
 
 /**

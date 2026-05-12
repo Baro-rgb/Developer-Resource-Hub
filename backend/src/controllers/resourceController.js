@@ -116,6 +116,12 @@ const createResource = async (req, res, next) => {
       return next(err);
     }
 
+    if (!category || !category.trim()) {
+      const err = new Error('Category is required');
+      err.statusCode = 400;
+      return next(err);
+    }
+
     const query = `
       INSERT INTO resources (owner_id, title, category, subcategory, url, technologies, description, notes, source, last_used_date)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -226,6 +232,12 @@ const updateResource = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, category, subcategory, url, technologies, description, notes, source, lastUsedDate } = req.body;
+
+    if (category !== undefined && (!category || !category.trim())) {
+      const err = new Error('Category is required');
+      err.statusCode = 400;
+      return next(err);
+    }
 
     // Tạo dynamic update query
     const updates = [];

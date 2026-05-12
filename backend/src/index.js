@@ -14,6 +14,7 @@ const shareRoutes = require('./routes/shareRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const automationRoutes = require('./routes/automationRoutes');
 const upgradeRoutes = require('./routes/upgradeRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 /**
@@ -155,6 +156,9 @@ app.use('/api/automation', automationRoutes);
 
 // Upgrade API routes
 app.use('/api/upgrade', upgradeRoutes);
+
+// Payment API routes
+app.use('/api/payment', paymentRoutes);
 
 // ==========================================
 // 4. 404 HANDLER

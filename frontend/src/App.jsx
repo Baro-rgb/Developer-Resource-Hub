@@ -9,6 +9,9 @@ import Register from './pages/Register';
 import Welcome from './pages/Welcome';
 
 import Admin from './pages/Admin';
+import Pricing from './pages/Pricing';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentCancel from './pages/PaymentCancel';
 import './styles/index.css';
 
 /**
@@ -42,6 +45,9 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/welcome" element={<Welcome />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/cancel" element={<PaymentCancel />} />
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

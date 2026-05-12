@@ -74,6 +74,7 @@ const previewLink = async (req, res, next) => {
 const importLink = async (req, res, next) => {
   try {
     const { token } = req.params;
+    const { category: targetCategory } = req.body;
     const user_id = req.user.id;
     await ensureResourceQuota(req.user, 1);
 
@@ -102,13 +103,14 @@ const importLink = async (req, res, next) => {
     }
 
     const r = resourceResult.rows[0];
+    const finalCategory = targetCategory || r.category;
 
     // Copy resource to new owner
     const insertResult = await pool.query(
       `INSERT INTO resources 
         (title, url, description, technologies, notes, category, subcategory, source, owner_id) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [r.title, r.url, r.description, r.technologies, r.notes, r.category, r.subcategory, r.source, user_id]
+      [r.title, r.url, r.description, r.technologies, r.notes, finalCategory, r.subcategory, r.source, user_id]
     );
 
     res.json({
