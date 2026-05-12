@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Sparkles, Zap, Shield, ArrowRight, ArrowLeft, Loader2, QrCode } from 'lucide-react';
+import { Check, Sparkles, Zap, Shield, ArrowLeft, Loader2, QrCode } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { createPaymentLink, checkPaymentStatus } from '../services/api';
 

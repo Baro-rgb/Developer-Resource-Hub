@@ -43,7 +43,6 @@ const Dashboard = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
 
-  const [upgradeMessage, setUpgradeMessage] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
   const shouldShowCategoryGuide =
     !filters.category && !filters.subcategory && !filters.search && !filters.source;
@@ -176,7 +175,6 @@ const Dashboard = () => {
           onCancel={handleFormCancel}
           onQuotaExceeded={(msg) => {
             setShowForm(false);
-            setUpgradeMessage(msg);
             navigate('/pricing');
           }}
         />
@@ -250,7 +248,6 @@ const Dashboard = () => {
               ) : (
                 <button
                   onClick={() => {
-                    setUpgradeMessage('Nâng cấp lên gói Pro để mở khóa không giới hạn tài nguyên và danh mục!');
                     navigate('/pricing');
                   }}
                   className="flex items-center gap-1 rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-bold text-slate-400 hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30 transition-all"
@@ -427,7 +424,6 @@ const Dashboard = () => {
           onClose={() => setShowCategoryManager(false)}
           onQuotaExceeded={(msg) => {
             setShowCategoryManager(false);
-            setUpgradeMessage(msg);
             navigate('/pricing');
           }}
           onCategoryUpdate={() => {
